@@ -1,0 +1,10 @@
+{
+    "autoload": {
+        "psr-0": {"AwsBootcamp": "src/"}
+    },
+    "require": {
+        "fzaninotto/faker": "^1.7",
+        "webit/eval-math": "^1.0",
+        "aws/aws-sdk-php": "^3.36"
+    }
+}
