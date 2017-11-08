@@ -2,6 +2,7 @@
 
 In order to run, make sure to have the following : 
 
+- Run `composer install` after pulling the code from github
 - Create an S3 bucket
  Update the bucketName in the deploy.sh script
 - Use the deploy.sh script to deploy the code into S3 - this will also copy the cloudformation.json file there  
