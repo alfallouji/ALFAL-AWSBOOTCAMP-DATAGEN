@@ -3,12 +3,9 @@
 In order to run, make sure to have the following : 
 
 - Create an S3 bucket
-- Update the bucketName in the deploy.sh script
-- Update the following line with the adequate bucket name (Line 172 in cloudformation.json) :
- 
-    "download": { "command": "aws s3 cp s3://`kinesis-datagen`/kinesis-datagen.tar /var/www/html/kinesis-datagen.tar\n" },
- 
+ Update the bucketName in the deploy.sh script
 - Use the deploy.sh script to deploy the code into S3 - this will also copy the cloudformation.json file there  
+- Provide the adequate S3 Bucket name when creating the cloudformation stack
 - Create a Kinesis Stream (remember its name, it will be needed in the webconsole)
 
 ## Usage
