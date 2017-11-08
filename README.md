@@ -24,20 +24,24 @@ You can also defined the the size of the population. The generated data will be 
 When defining rules, it is your responsibility to ensure that the rules make sense. For example, if you defined the following : 
 
     'field1' => array(
-		'type' => 'mathExpression',
-		'mathExpression	' => '1000 + {field2}',
-	)
+        'type' => 'rules',
+        // Value => condition
+        'rules' => array(
+            'Y' => '{field2} + {field3} > 1060',
+            'N' => '{field2} + {field3} <= 1060',
+        ),        
+    ),
 
 And, then define the following distribution : 
 
 	'distribution' => array(
         'field1' => array(
-            '' => 80,
-            'africa' => 20,
+            'Y' => 80,
+            'N' => 20,
         ),
     )
 
-Assuming that {field2} can only be a positive integer. You will end up with an infinite loop, since the generator will keep looping until it reaches the desired distribution.
+If `{field2} + {field3}` can never be equal or below 1060, then the generator will end up with an infinite loop. Since it will keep running until it reaches the desired distribution.
 
 ## Requirements
 
