@@ -23,19 +23,19 @@ You can also defined the the size of the population. The generated data will be 
 
 When defining rules, it is your responsibility to ensure that the rules make sense. For example, if you defined the following : 
 
-    `'field1' => array(
+    'field1' => array(
 		'type' => 'mathExpression',
 		'mathExpression	' => '1000 + {field2}',
-	)`
+	)
 
 And, then define the following distribution : 
 
-	`'distribution' => array(
+	'distribution' => array(
         'field1' => array(
             '' => 80,
             'africa' => 20,
         ),
-    )`
+    )
 
 Assuming that {field2} can only be a positive integer. You will end up with an infinite loop, since the generator will keep looping until it reaches the desired distribution.
 
