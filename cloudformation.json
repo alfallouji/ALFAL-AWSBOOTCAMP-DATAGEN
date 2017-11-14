@@ -188,6 +188,7 @@
                             },
 
                             "extract": { "command": "cd /var/www/html/; tar -xvf kinesis-datagen.tar\n" },
+                            "install": { "command": "cd /var/www/html/kinesis-datagen; sh ./setup/composer.sh; php composer.phar install\n" },
                             "restart" : { "command": "sudo service httpd restart\n" }
                         }
                     }
