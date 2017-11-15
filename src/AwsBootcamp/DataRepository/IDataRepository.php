@@ -2,12 +2,11 @@
 namespace AwsBootcamp\DataRepository;
 
 /**
- * Kinesis Service
- * Class that allows to push data to Kinesis
+ * DataRepository Interface
  */
 interface IDataRepository { 
     /**
-     * Push current batch to kinesis
+     * Push current batch 
      * 
      * @param array $batch Batch to push
      *
