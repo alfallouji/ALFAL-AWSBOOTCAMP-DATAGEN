@@ -179,6 +179,14 @@ return array(
             ),
         ),
 
+        'counter' => array(
+            'type' => 'counter',
+            'counter' => array(
+                'start' => 2,
+                'step' => 5,
+            ),
+        ),
+            
         'result' => array(
             'type' => 'rules',
             // Value => condition

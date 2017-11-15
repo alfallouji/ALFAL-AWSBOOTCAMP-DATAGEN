@@ -61,29 +61,33 @@ class DataSet {
     protected $_faker = null;
 
     /**
+     * Array containing various counters
+     * @var array
+     */
+    protected $_counters = array();
+
+    /**
      * Array containing the current batch that will be sent to Kinesis
      * @var array
      */
     protected $_kinesisBatch = array();
 
     /**
-     * Kinesis \client
-     * @var \Aws\Kinesis\KinesisClient
+     * Data repository where data is being pushed to 
+     * @var AwsBootcamp\DataRepository\IDataRepository 
      */
-    protected $_kinesis = null;
+    protected $_dataRepository = null;
 
     /**
      * Class constructor
      *
-     * @param Aws\Kinesis\KinesisClient $kinesis Kinesis Client
-     * @param string $kinesisStreamName Name of the kinesis stream
+     * @param AwsBootcamp\DataRepository\IDataRepository $dataRepository Data Repository
      * @return void
      */
-    public function __construct(\Aws\Kinesis\KinesisClient $kinesis, $kinesisStreamName) { 
+    public function __construct(\AwsBootcamp\DataRepository\IDataRepository $dataRepository) { 
         $this->_faker = \Faker\Factory::create();
         $this->_evalMath = new \Webit\Util\EvalMath\EvalMath();
-        $this->_kinesis = $kinesis;
-        $this->_kinesisStreamName = $kinesisStreamName;
+        $this->_dataRepository = $dataRepository;
     }
 
     /**
@@ -131,7 +135,7 @@ class DataSet {
 
                 // Push batch to kinesis 
                 if (sizeof($this->_kinesisBatch) == $batchSize) { 
-                    $this->_pushToKinesis();
+                    $this->_dataRepository->push($this->_kinesisBatch);
                     $this->_kinesisBatch = array();
                 }
             }
@@ -142,7 +146,7 @@ class DataSet {
 
         // If anything left, push it to Kinesis
         if (sizeof($this->_kinesisBatch) > 0) { 
-            $this->_pushToKinesis();
+            $this->_dataRepository->push($this->_kinesisBatch);
         }
 
         \cli::log('Example of a data entry that got generated:');
@@ -222,6 +226,19 @@ class DataSet {
             return $this->_faker->$propertyName;
             break;
 
+        case 'counter':
+            if (!isset($v['counter']['start']) || !isset($v['counter']['step'])) { 
+                throw new \Exception('Invalid configuration. Must provide a start and a step parameters : ' . print_r($v, true));
+            }
+
+            if (!isset($this->_counters[$k])) { 
+                $this->_counters[$k] = $v['counter']['start'];
+            } else { 
+                $this->_counters[$k] += $v['counter']['step'];
+            }
+
+            return $this->_counters[$k];
+            
         default:
             throw new \Exception('Invalid configuration. Unknown type defined : ' . $v['type']);
             break;
@@ -309,20 +326,5 @@ class DataSet {
                 return $key;
             }
         }
-    }
-
-    /**
-     * Push current batch to kinesis
-     * 
-     * @return array Result
-     */
-    protected function _pushToKinesis() { 
-        foreach ($this->_kinesisBatch as $record) { 
-            $records[] = array('Data' => json_encode($record), 'PartitionKey' => uniqid(),);
-        }
-        $result = $this->_kinesis->putRecords(array('Records' => $records, 'StreamName' => $this->_kinesisStreamName));
-        \cli::log('Pushing to kinesis a batch of ' . sizeof($records) . ' records to ' . $this->_kinesisStreamName);
-
-        return $result;
     }
 }

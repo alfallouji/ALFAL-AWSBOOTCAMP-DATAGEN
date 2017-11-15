@@ -9,7 +9,7 @@ $start = microtime(true);
 ini_set('max_execution_time', 1800);
 ini_set('memory_limit', '256M');
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 class cli { public static $log = null; public static function log($m) { self::$log .= '[' . date('Y-m-d H:i:s') . '] ' . $m . PHP_EOL; } }
 
@@ -22,7 +22,7 @@ if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] != 'localhost') {
     $creds = file_get_contents('http://169.254.169.254/latest/meta-data/iam/security-credentials/' . $metadataRole);
     $json = json_decode($creds, true);
 } else { 
-    $credentialsFile = __DIR__ . '/config/credentials.php';
+    $credentialsFile = __DIR__ . '/../config/credentials.php';
     if (file_exists($credentialsFile)) { 
         $credentials = require $credentialsFile;
     }
@@ -36,7 +36,7 @@ $key = isset($_REQUEST['key']) ? $_REQUEST['key'] : $defaultKey;
 $secret = isset($_REQUEST['secret']) ? $_REQUEST['secret'] : $defaultSecret;
 $region = isset($_REQUEST['region']) ? $_REQUEST['region'] : 'us-east-1';
 $streamName = isset($_REQUEST['streamName']) ? $_REQUEST['streamName'] : 'elasticsearch-stream-01';
-$config = isset($_REQUEST['config']) ? json_decode($_REQUEST['config'], true) : require __DIR__ . '/config/game-base.template.php';
+$config = isset($_REQUEST['config']) ? json_decode($_REQUEST['config'], true) : require __DIR__ . '/../config/game-base.template.php';
 $total = isset($_REQUEST['total']) ? $_REQUEST['total'] : 500;
 $batchSize = isset($_REQUEST['batchSize']) ? $_REQUEST['batchSize'] : 400;
 
@@ -53,7 +53,8 @@ try {
 
     $result = null;
     if (isset($_REQUEST['submit'])) { 
-        $gen = new AwsBootcamp\Generator\DataSet($kinesis, $streamName);
+        $dataRepository = new AwsBootcamp\DataRepository\Kinesis($kinesis, $streamName);
+        $gen = new AwsBootcamp\Generator\DataSet($dataRepository);
         $dataSet = $gen->execute($config, $total, $batchSize);
 
         $result = PHP_EOL . 'Stats' . PHP_EOL;

@@ -177,18 +177,19 @@
                         },
 
                         "commands" : {
+                            "init": {"command": "mkdir /var/www/html/kinesis-datagen/"},
                             "download": { "command":
                                 { "Fn::Join" : ["", [
                                             "aws s3 cp s3://",
                                             { "Ref" : "S3BucketName" },
-                                            "/kinesis-datagen.tar /var/www/html/kinesis-datagen.tar\n",
+                                            "/kinesis-datagen.tar /var/www/html/kinesis-datagen/kinesis-datagen.tar\n",
                                         ]
                                     ]
                                 }
                             },
 
-                            "extract": { "command": "cd /var/www/html/; tar -xvf kinesis-datagen.tar\n" },
-                            "install": { "command": "cd /var/www/html/kinesis-datagen; sh ./setup/composer.sh; php composer.phar install\n" },
+                            "extract": { "command": "cd /var/www/html/kinesis-datagen/; tar -xvf kinesis-datagen.tar; rm kinesis-datagen.tar\n" },
+                            "install": { "command": "sh ./setup/composer.sh; php composer.phar install\n" },
                             "restart" : { "command": "sudo service httpd restart\n" }
                         }
                     }
@@ -238,7 +239,7 @@
     "Outputs" : {
         "WebsiteURL" : {
             "Description" : "URL for newly created LAMP stack",
-            "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServerInstance", "PublicDnsName" ]}, "/kinesis-datagen/"]] }
+            "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServerInstance", "PublicDnsName" ]}, "/kinesis-datagen/www/"]] }
         }
     }
 }
