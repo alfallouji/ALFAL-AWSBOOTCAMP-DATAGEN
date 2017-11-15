@@ -177,7 +177,7 @@
                         },
 
                         "commands" : {
-                            "init": {"command": "mkdir /var/www/html/kinesis-datagen/"},
+                            "init": {"command": "sudo mkdir /var/www/html/kinesis-datagen/"},
                             "download": { "command":
                                 { "Fn::Join" : ["", [
                                             "aws s3 cp s3://",
@@ -188,8 +188,8 @@
                                 }
                             },
 
-                            "extract": { "command": "cd /var/www/html/kinesis-datagen/; tar -xvf kinesis-datagen.tar; rm kinesis-datagen.tar\n" },
-                            "install": { "command": "sh ./setup/composer.sh; php composer.phar install\n" },
+                            "extract": { "command": "sudo cd /var/www/html/kinesis-datagen/; sudo tar -xvf kinesis-datagen.tar; sudo rm kinesis-datagen.tar\n" },
+                            "install": { "command": "sudo sh ./setup/composer.sh; sudo php composer.phar install\n" },
                             "restart" : { "command": "sudo service httpd restart\n" }
                         }
                     }
