@@ -11,6 +11,7 @@ The following features are supported :
  - Random element from a weighted list (e.g. 'elem1' => 20% of chance, 'elem2' => 40% of chance, etc.)
  - Constant
  - Timestamp / Date
+ - Counter (increment & decrement)
  - Mathematical expression using previously defined fields 
      `{{field1} + {field2} / 4) * {field3})`
  - Conditional rules : 
