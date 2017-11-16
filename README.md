@@ -44,6 +44,28 @@ And, then define the following distribution :
 
 If `{field2} + {field3}` can never be equal or below 1060, then the generator will end up with an infinite loop. Since it will keep running until it reaches the desired distribution.
 
+## Deploy it on AWS
+
+You can either deploy the solution locally or deploy it in AWS. From a performance perspective, you will get a better speed (request/sec) by deploying it in AWS (better network latency for the Kinesis API calls).
+
+In order to deploy the solution to AWS, do the following : 
+
+ 1. Clone the repository
+ 2. Create an S3 Bucket in AWS
+ 3. Install the AWS CLI
+ 4. Run `sh setup/deploy.sh <YourS3BucketName>`
+ 5. Run `sh setup/create-stack.sh` to create the cloudformation stack
+ 6. Wait for the cloudformation to finish (takes approx. 6 minutes). You will find the web URL in the output section of the cloudformation stack.
+
+## Deploy it locally
+
+You can also (for testing purpose) deploy the solution locally, by doing the following : 
+
+ 1. Clone the repository
+ 2. Run `sh setup/composer.sh` to install composer (if you don't have it)
+ 3. Create a config/credentials.php file (use the sample as an example) with the right aws credentials
+ 4. You will need to install PHP7+ and apache
+
 ## Requirements
 
 In order to run, make sure to have the following : 
@@ -68,10 +90,102 @@ For the web console, use index.php.
 ### Command line
 You can also use the command line script generate.php.
 
-### For development
-If you want to run this locally (e.g. on your laptop), make sure to create a config/credentials.php file (use the sample as an example). Provide the adequate access key and secret. You will have to install PHP7+ and apache.
-
 ## Keep in mind
 
 - Deploying and executing the code on an ec2 instance will provide the best performance (lower latency to push to Kinesis).
 - Speed will also depend on the number of shards that you have defined for the kinesis stream.
+
+## Example
+
+<?php
+
+return array(
+
+    // Define the desired distribution (optional)
+    'distribution' => array(
+        // We want to have 30% of our distribution with a value of 'Y' for the result field
+        // and 70% with a value of 'N'
+        'result' => array(
+            'Y' => 3,
+            'N' => 7,
+        ),
+    ),
+
+    // Define the desired fields (mandatory)
+    'fields' => array(
+
+        // You can use date function and provide the desired format
+        'time' => array(
+            'type' => 'date',
+            'format' => 'Y-m-d H:i:s',
+        ),
+
+        // Randomly pick an integer number between 10 and 100
+        'field1' => array(
+            'type' => 'randomNumber',
+            'randomNumber' => array(
+                'max' => '100',
+                'min' => '10',
+            ),
+        ),
+
+        // Field2 is a constant equalts to 1000 (could be any string)
+        'field2' => array(
+            'type' => 'constant',
+            'constant' => '1000',
+        ),
+
+        // Randomly pick an element from a defined list of values
+        'field3' => array(
+            'type' => 'randomList',
+            'randomList' => array(
+                'us',
+                'europe',
+                'asia',
+            ),
+        ),
+
+        // Pick an element from a weighted list 
+        'field4' => array(
+            'type' => 'weightedList',
+            'weightedList' => array(
+                'men' => 40,
+                'women' => 60,
+            ),
+        ),
+
+        // You can use mathematical expression 
+        'field5' => array(
+            'type' => 'mathExpression',
+            // Value => condition
+            'mathExpression' => '{field1} + {field2} + sin({field2}) * 10',
+        ),
+
+        // You can use any of the faker feature
+        'field6' => array(
+            'type' => 'faker',
+            'property' => 'name',
+        ),
+
+        'field7' => array(
+            'type' => 'faker',
+            'property' => 'email',
+        ),
+
+        'field8' => array(
+            'type' => 'faker',
+            'property' => 'ipv4',
+        ),
+
+        // You can define conditonal rules to be evaluated in order to get the value
+        // if this condition is true : {field1} + {field2} > 1060, then the value for {result} is 'Y'
+        'result' => array(
+            'type' => 'rules',
+            // Value => condition
+            'rules' => array(
+                'Y' => '{field1} + {field2} > 1060',
+                'N' => '{field1} + {field2} <= 1060',
+            ),        
+        ),
+    ),
+);
