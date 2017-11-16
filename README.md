@@ -1,6 +1,6 @@
-## Kinesis Data Generator
+## Data Generator
 
-This provides an easy way to generate data sample and push them to an AWS Kinesis Stream.
+This provides an easy way to generate data sample and push them to something like a AWS Kinesis stream.
 
 The structure of the generated data can be defined within a configuration file. 
 
