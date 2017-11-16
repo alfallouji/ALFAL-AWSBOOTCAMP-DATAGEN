@@ -97,8 +97,6 @@ You can also use the command line script generate.php.
 
 ## Example
 
-`return array(
-
     // Define the desired distribution (optional)
     'distribution' => array(
         // We want to have 30% of our distribution with a value of 'Y' for the result field
@@ -185,4 +183,3 @@ You can also use the command line script generate.php.
             ),        
         ),
     ),
-);`
