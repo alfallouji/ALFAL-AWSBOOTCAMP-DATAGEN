@@ -1,5 +1,5 @@
 TEMPLATE_URL="http://s3.amazonaws.com/kinesis-datagen/cloudformation.json"
-KEY_NAME="amazon-bashar"
+KEY_NAME="my-keyname"
 S3_BUCKET_NAME="kinesis-datagen"
 PARAMETERS="ParameterKey=InstanceType,ParameterValue=m1.small ParameterKey=KeyName,ParameterValue="$KEY_NAME" ParameterKey=S3BucketName,ParameterValue="$S3_BUCKET_NAME" ParameterKey=SSHLocation,ParameterValue=0.0.0.0/0"
 STACKNAME="test-kinesis-"$RANDOM
