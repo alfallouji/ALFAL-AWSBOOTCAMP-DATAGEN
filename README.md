@@ -18,7 +18,7 @@ The following features are supported :
  - Counter (increment & decrement)
  - Mathematical expression using previously defined fields 
      `{{field1} + {field2} / 4) * {field3})`
- - Conditional rules : 
+ - Conditionnal rules : 
     `{field3} equals TRUE if {field1} + {field2} < 1000`
     `{field4} equals FALSE if {field1} + {field2} >= 1000`
 - Any of the feature exposed by `fzaninotto/faker` library 
