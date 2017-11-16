@@ -130,7 +130,7 @@
             "Metadata" : {
                 "AWS::CloudFormation::Init" : {
                     "configSets" : {
-                        "InstallAndRun" : [ "Install" ]
+                        "InstallAndRun" : [ "Install", "Configure", "Download", "Extract", "Composer", "Restart" ]
                     },
 
                     "Install" : {
@@ -174,23 +174,43 @@
                                 "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true",
                                     "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"]}
                             }
-                        },
-
+                        }
+                    },
+                    "Configure" : {
                         "commands" : {
-                            "init": {"command": "sudo mkdir /var/www/html/kinesis-datagen/"},
+                            "init": {"command": "echo 'ok'; mkdir /var/www/html/kinesis-datagen"}
+                        }
+                    },
+
+                    "Download" : {
+                        "commands" : {
                             "download": { "command":
                                 { "Fn::Join" : ["", [
                                             "aws s3 cp s3://",
                                             { "Ref" : "S3BucketName" },
-                                            "/kinesis-datagen.tar /var/www/html/kinesis-datagen/kinesis-datagen.tar\n",
+                                            "/kinesis-datagen.tar /var/www/html/kinesis-datagen/kinesis-datagen.tar"
                                         ]
                                     ]
                                 }
-                            },
+                            }
+                        }
+                    },
 
-                            "extract": { "command": "sudo cd /var/www/html/kinesis-datagen/; sudo tar -xvf kinesis-datagen.tar; sudo rm kinesis-datagen.tar\n" },
-                            "install": { "command": "sudo sh ./setup/composer.sh; sudo php composer.phar install\n" },
-                            "restart" : { "command": "sudo service httpd restart\n" }
+                    "Extract" : {
+                        "commands" : {
+                            "extract": { "command": "cd /var/www/html/kinesis-datagen/; sudo tar -xvf kinesis-datagen.tar; sudo rm kinesis-datagen.tar" }
+                        }
+                    },
+
+                    "Composer" : {
+                        "commands": { 
+                            "composer": { "command": "cd /var/www/html/kinesis-datagen/; sudo sh ./setup/composer.sh; sudo php composer.phar install" }
+                        }
+                    },
+
+                    "Restart" : {
+                        "commands": {
+                            "restart" : { "command": "sudo service httpd restart" }
                         }
                     }
                 }
@@ -215,7 +235,13 @@
                         "         --stack ", { "Ref" : "AWS::StackName" },
                         "         --resource WebServerInstance ",
                         "         --region ", { "Ref" : "AWS::Region" }, "\n"
-                    ]]}}
+                    ]]}},
+                    "Tags" : [ {"Key": "Name", "Value": { "Fn::Join" : [
+                            "", [
+                                "linux-awsami-", 
+                                { "Ref" : "AWS::StackName" } 
+                            ]
+                    ]}}]
             },
             "CreationPolicy" : {
                 "ResourceSignal" : {
