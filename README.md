@@ -97,9 +97,7 @@ You can also use the command line script generate.php.
 
 ## Example
 
-<?php
-
-return array(
+`return array(
 
     // Define the desired distribution (optional)
     'distribution' => array(
@@ -159,8 +157,7 @@ return array(
             'type' => 'mathExpression',
             // Value => condition
             'mathExpression' => '{field1} + {field2} + sin({field2}) * 10',
-        ),
-
+        
         // You can use any of the faker feature
         'field6' => array(
             'type' => 'faker',
@@ -188,4 +185,4 @@ return array(
             ),        
         ),
     ),
-);
+);`
