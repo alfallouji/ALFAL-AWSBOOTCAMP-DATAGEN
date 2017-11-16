@@ -1,6 +1,10 @@
+## Disclaimer
+
+<b>This code is provided free of charge. If you decide to deploy this on AWS (using the cloudformation script), you may incur charges related to the resources you are using in AWS (e.g. EC2, S3, Kinesis, etc.).</b>
+
 ## Data Generator
 
-This provides an easy way to generate data sample and push them to something like a AWS Kinesis stream.
+This tool provides an easy way to generate data sample and push them to something like a AWS Kinesis stream.
 
 The structure of the generated data can be defined within a configuration file. 
 
@@ -56,6 +60,8 @@ In order to deploy the solution to AWS, do the following :
  4. Run `sh setup/deploy.sh <YourS3BucketName>`
  5. Run `sh setup/create-stack.sh` to create the cloudformation stack
  6. Wait for the cloudformation to finish (takes approx. 6 minutes). You will find the web URL in the output section of the cloudformation stack.
+
+You can also use the following link to deploy the latest version : [Build it on AWS](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=OpsAutomator&templateURL=https://s3.amazonaws.com/alfal-awsbootcamp-datagen/cloudformation.json)
 
 ## Deploy it locally
 
