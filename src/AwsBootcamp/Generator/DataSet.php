@@ -114,8 +114,17 @@ class DataSet {
             foreach ($config['distribution'] as $field => $data) { 
                 $sum = array_sum($data);
                 foreach ($data as $value => $weight) { 
-                    $this->_expectedDistribution[$field][$value] = ($weight / $sum) * $total;
+                    $this->_expectedDistribution[$field][$value] = (int) (($weight / $sum) * $total);
                     $this->_currentDistribution[$field][$value] = 0;
+                }
+
+                // Ensure we generate the right amount 
+                $delta = $total - array_sum($this->_expectedDistribution[$field]);
+                if ($delta != 0) { 
+                    $this->_expectedDistribution[$field][$value] += $delta;
+                }
+
+                foreach ($data as $value => $weight) { 
                     \cli::log('I will generate ' . $this->_expectedDistribution[$field][$value] . ' records with ' . $field . ' = ' . $value);
                 }
             }
@@ -297,8 +306,8 @@ class DataSet {
     protected function _validateData($dataRow) {
         foreach ($this->_expectedDistribution as $k => $values) {
             $currentValue = $dataRow[$k];
-            if ($this->_currentDistribution[$k][$currentValue] == $this->_expectedDistribution[$k][$currentValue]) { 
-                return false;
+            if ($this->_currentDistribution[$k][$currentValue] >= $this->_expectedDistribution[$k][$currentValue]) {
+               return false;
             }
         }
 

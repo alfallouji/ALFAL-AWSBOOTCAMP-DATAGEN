@@ -2,10 +2,16 @@
 $start = microtime(true); 
 
 class cli { public static function log($m) { echo '[' . date('Y-m-d H:i:s') . '] ' . $m . PHP_EOL; } }
-
 require __DIR__ . '/../vendor/autoload.php';
 
-if (!getenv('IS_DEV')) { 
+$shortopts = 'i:d::';
+$longopts = array('implementation:', 'dev::',);
+$opts = getopt($shortopts, $longopts);
+$isDev = isset($opts['d']) ? $opts['d'] : true;
+$implementation = isset($opts['i']) ? $opts['i'] : 'file';
+
+$json = array();
+if (!$isDev) { 
     // Fetch creds from ec2 metadata instance (if available)
     $creds = file_get_contents('http://169.254.169.254/latest/meta-data/iam/security-credentials/ec2-s3Role');
     $json = json_decode($creds, true);
@@ -13,9 +19,9 @@ if (!getenv('IS_DEV')) {
     $credentials = require __DIR__ . '/../config/credentials.php';
 }
 
-$defaultKey = isset($json['AccessKeyId']) ? $json['AccessKeyId'] : $credentials['key'];
-$defaultSecret = isset($json['SecretAccessKey']) ? $json['SecretAccessKey'] : $credentials['secret'];
-
+$key = isset($json['AccessKeyId']) ? $json['AccessKeyId'] : $credentials['key'];
+$secret = isset($json['SecretAccessKey']) ? $json['SecretAccessKey'] : $credentials['secret'];
+$region = 'us-east-1';
 $kinesis = Aws\Kinesis\KinesisClient::factory(array(
     'credentials' => array(
         'key'    => $key,
@@ -25,12 +31,24 @@ $kinesis = Aws\Kinesis\KinesisClient::factory(array(
     'version' => 'latest',
 ));
 
-$streamName = 'elasticsearch-stream-01';
-$dataRepository = new AwsBootcamp\DataRepository\Kinesis($kinesis, $streamName);
-$gen = new AwsBootcamp\Generator\DataSet($dataRepository);
- 
+switch ($implementation) { 
+    case 'kinesis':
+        $streamName = 'elasticsearch-stream-01';
+        $repository = new AwsBootcamp\DataRepository\Kinesis($kinesis, $streamName);
+    break;
+    
+    case 'file':
+        $repository = new AwsBootcamp\DataRepository\File('/tmp/test.json');
+    break;
+
+    default: 
+        throw new \Exception('Must provide a valid value for implementation');
+    break;
+}
+
+$gen = new AwsBootcamp\Generator\DataSet($repository);
 $config = require __DIR__ . '/../config/game-base.template.php';
-$dataSet = $gen->execute($config, 100, 50);
+$dataSet = $gen->execute($config, 220, 50);
 
 echo PHP_EOL . 'Stats' . PHP_EOL;
 echo '---------' . PHP_EOL;
