@@ -18,7 +18,7 @@ The following features are supported :
  - Counter (increment & decrement)
  - Mathematical expression using previously defined fields 
      `{{field1} + {field2} / 4) * {field3})`
- - Conditional rules : 
+ - Conditionnal rules : 
     `{field3} equals TRUE if {field1} + {field2} < 1000`
     `{field4} equals FALSE if {field1} + {field2} >= 1000`
 - Any of the feature exposed by `fzaninotto/faker` library 
@@ -61,7 +61,7 @@ In order to deploy the solution to AWS, do the following :
  5. Run `sh setup/create-stack.sh` to create the cloudformation stack
  6. Wait for the cloudformation to finish (takes approx. 6 minutes). You will find the web URL in the output section of the cloudformation stack.
 
-You can also use the following link to deploy the latest version : [Build it on AWS](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=OpsAutomator&templateURL=https://s3.amazonaws.com/alfal-awsbootcamp-datagen/cloudformation.json)
+You can also use the following link to deploy the latest version : [Build it on AWS](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=awsDatagenStack&templateURL=https://s3.amazonaws.com/alfal-awsbootcamp-datagen/cloudformation.json)
 
 ## Deploy it locally
 
