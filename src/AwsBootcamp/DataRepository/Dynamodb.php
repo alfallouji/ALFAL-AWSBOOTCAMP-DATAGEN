@@ -38,6 +38,23 @@ class File implements IDataRepository {
         $result = file_put_contents($this->_filename, $content, FILE_APPEND);
         \cli::log('Pushing a batch of ' . sizeof($batch) . ' records to file : ' . $this->_filename);
 
+        /** @todo 
+		$response = $client->batchWriteItem(array(
+			"RequestItems" => array(
+				$tableName => array(
+					array(
+						"PutRequest" => array(
+							"Item" => array(
+								"id"   => array('N' => 40),
+								"type" => array('S' => "book"),
+								"title"=> array('S' => "DynamoDB Cookbook")
+							))
+					),
+					array(
+						"DeleteRequest" => array(
+						   ...
+        */
+
         return $result;
     }
 }
