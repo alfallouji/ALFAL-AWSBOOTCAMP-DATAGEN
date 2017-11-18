@@ -4,12 +4,15 @@ $start = microtime(true);
 class cli { public static function log($m) { echo '[' . date('Y-m-d H:i:s') . '] ' . $m . PHP_EOL; } }
 require __DIR__ . '/../vendor/autoload.php';
 
-$shortopts = 'i:d::f::';
-$longopts = array('implementation:', 'dev::', 'file::',);
-$opts = getopt($shortopts, $longopts);
+$shortopts = 'i:d::f::r::c::';
+$opts = getopt($shortopts, array());
+
 $isDev = isset($opts['d']) ? $opts['d'] : true;
 $implementation = isset($opts['i']) ? $opts['i'] : 'file';
 $file = isset($opts['f']) ? $opts['f'] : sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dataset.json';
+$region = isset($opts['r']) ? $opts['r'] : 'us-east-1';
+$configFile = isset($opts['c']) ? $opts['c'] : __DIR__ . '/../config/game-base.template.php';
+$tableName = isset($opts['t']) ? $opts['t'] : 'datagen-dynamo-table';
 
 $json = array();
 if (!$isDev) { 
@@ -22,19 +25,18 @@ if (!$isDev) {
 
 $key = isset($json['AccessKeyId']) ? $json['AccessKeyId'] : $credentials['key'];
 $secret = isset($json['SecretAccessKey']) ? $json['SecretAccessKey'] : $credentials['secret'];
-$region = 'us-east-1';
-$kinesis = Aws\Kinesis\KinesisClient::factory(array(
-    'credentials' => array(
-        'key'    => $key,
-        'secret' => $secret,
-    ),
-    'region' => $region,
-    'version' => 'latest',
-));
 
 $msg = null;
 switch ($implementation) { 
     case 'kinesis':
+        $kinesis = Aws\Kinesis\KinesisClient::factory(array(
+            'credentials' => array(
+                'key'    => $key,
+                'secret' => $secret,
+            ),
+            'region' => $region,
+            'version' => 'latest',
+        ));
         $streamName = 'elasticsearch-stream-01';
         $repository = new AwsBootcamp\DataRepository\Kinesis($kinesis, $streamName);
     break;
@@ -44,13 +46,24 @@ switch ($implementation) {
         $msg = 'Generated dataset file : ' . $file;
     break;
 
+    case 'dynamodb':
+		$client = Aws\DynamoDb\DynamoDbClient::factory(array(
+            'credentials' => array(
+                'key'    => $key,
+                'secret' => $secret,
+            ),
+            'region' => $region,
+            'version' => 'latest',
+		));
+    break;
+
     default: 
         throw new \Exception('Must provide a valid value for implementation');
     break;
 }
 
 $gen = new AwsBootcamp\Generator\DataSet($repository);
-$config = require __DIR__ . '/../config/game-base.template.php';
+$config = require $configFile;
 $dataSet = $gen->execute($config, 220, 50);
 
 echo PHP_EOL . $msg;
