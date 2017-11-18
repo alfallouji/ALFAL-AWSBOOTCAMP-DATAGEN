@@ -1,6 +1,6 @@
 <?php
 /**
- * Web page to generate dataset and push it to a Kinesis stream
+ * Web page to generate dataset and push it 
  */
 // Starting timer
 $start = microtime(true); 
@@ -96,10 +96,6 @@ catch (\Exception $e) {
             <textarea class="form-control form-control-sm" rows="27" name="config"><?php echo json_encode($config, JSON_PRETTY_PRINT); ?></textarea>
           </div>
           <div class="form-group">
-            <small>Key</small>
-            <input class="small" type="text" name="key" value="<?php echo $key; ?>" placeholder="aws key"/>
-            <small>Secret</small>  
-            <input class="small" type="text" name="secret" value="<?php echo $secret; ?>" placeholder="aws secret"/>
             <small>Region</small>  
             <input class="small" type="text" name="region" value="<?php echo $region; ?>" placeholder="aws region"/>
             <small>StreamName</small>  
