@@ -12,6 +12,22 @@ return array(
 
     'fields' => array(
 
+        'id' => array(
+            'type' => 'counter',
+            'counter' => array(
+                'start' => 1,
+                'step' => 2,
+            )
+        ),
+
+        'decrement' => array(
+            'type' => 'counter',
+            'counter' => array(
+                'start' => 1000,
+                'step' => -1,
+            )
+        ),
+
         'datestamp' => array(
             'type' => 'date',
             'format' => 'Y-m-d H:i:s',
