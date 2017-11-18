@@ -147,6 +147,11 @@ class DataSet {
                     $this->_dataRepository->push($this->_kinesisBatch);
                     $this->_kinesisBatch = array();
                 }
+            } else {
+                // Decrement counter (if any)
+                foreach ($this->_counters as $key => $value) { 
+                    $this->_counters[$key] -= $config['fields'][$key]['counter']['step'];
+                }
             }
 
             $this->_currentData = array();
@@ -160,6 +165,8 @@ class DataSet {
 
         \cli::log('Example of a data entry that got generated:');
         \cli::log(print_r($this->_dataSet[0], true));
+        \cli::log('Example of a data entry that got generated:');
+        \cli::log(print_r($this->_dataSet[sizeof($this->_dataSet) - 1], true));
         \cli::log('I had to generate a total of (in order to make it): ' . $bigTotal);
 
         return $this->_dataSet;
