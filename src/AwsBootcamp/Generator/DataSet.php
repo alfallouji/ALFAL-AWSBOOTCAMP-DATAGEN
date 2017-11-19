@@ -67,10 +67,10 @@ class DataSet {
     protected $_counters = array();
 
     /**
-     * Array containing the current batch that will be sent
+     * Array of fields to hide
      * @var array
      */
-    protected $_currentBatch = array();
+    protected $_hiddenFields = array();
 
     /**
      * Data repository where data is being pushed to 
@@ -102,11 +102,14 @@ class DataSet {
     public function execute(array $config, $total, $batchSize) { 
         $this->_dataSet = array();
         $this->_patternFields = array();
-        $this->_currentBatch = array();
+        $currentBatch = array();
 
-        // Get list of fields for pattern replacement
+        // Get list of fields for pattern replacement and to hide
         foreach ($config['fields'] as $field => $data) { 
             $this->_patternFields[] = '{' . $field . '}';
+            if (isset($data['hide']) && true === $data['hide']) {
+                $this->_hiddenFields[] = $field;
+            }
         }
 
         // Get desired distribution if any defined
@@ -130,22 +133,25 @@ class DataSet {
             }
         }
 
+        // Start the generation of the dataset
+        $currentBatch = array();
         $bigTotal = 1;
         $cpt = 1;
         while($cpt <= $total) {
             foreach ($config['fields'] as $k => $v) { 
                 $this->_currentData[$k] = $this->_computeField($k, $v);
             }
-
+                        
             if ($this->_validateData($this->_currentData)) {
                 ++$cpt;
-                $this->_dataSet[] = $this->_currentData;
-                $this->_currentBatch[] = $this->_currentData;
+                $filteredData = $this->_filterHiddenFields($this->_currentData);
+                $this->_dataSet[] = $filteredData;
+                $currentBatch[] = $filteredData;
 
                 // Push batch to kinesis 
-                if (sizeof($this->_currentBatch) == $batchSize) { 
-                    $this->_dataRepository->push($this->_currentBatch);
-                    $this->_currentBatch = array();
+                if (sizeof($currentBatch) == $batchSize) {
+                    $this->_dataRepository->push($currentBatch);
+                    $currentBatch = array();
                 }
             } else {
                 // Decrement counter (if any)
@@ -159,8 +165,8 @@ class DataSet {
         }
 
         // If anything left, push it to Kinesis
-        if (sizeof($this->_currentBatch) > 0) { 
-            $this->_dataRepository->push($this->_currentBatch);
+        if (sizeof($currentBatch) > 0) {
+            $this->_dataRepository->push($currentBatch);
         }
 
         \cli::log('Example of a data entry that got generated:');
@@ -233,6 +239,10 @@ class DataSet {
             return $this->_computeMathExpression($v);
             break;
 
+        case 'stringExpression':
+            return $this->_computeStringExpression($v);
+            break;
+
         case 'faker':
             if (!isset($v['property'])) { 
                 throw new \Exception('Invalid configuration. Must define a property value : ' . print_r($v, true)); 
@@ -290,6 +300,16 @@ class DataSet {
     }
 
     /**
+     * Compute a string expression
+     *
+     * @param string $v String expression
+     * @return mixed Evaluated result
+     */
+    protected function _computeStringExpression($v) { 
+        return str_replace($this->_patternFields, $this->_currentData, $v['stringExpression']);
+    }
+
+    /**
      * Compute a mathematical expression
      *
      * @param string $v Math expression
@@ -342,5 +362,23 @@ class DataSet {
                 return $key;
             }
         }
+    }
+
+    /**
+     * Filter any fields that should be hidden
+     *
+     * @param array $data Data to process
+     * @return array Filtered data
+     */
+    protected function _filterHiddenFields(array $data) {
+        if (empty($this->_hiddenFields)) { 
+            return $data;
+        }
+
+        foreach ($this->_hiddenFields as $field) {
+            unset($data[$field]);            
+        }
+
+        return $data;
     }
 }

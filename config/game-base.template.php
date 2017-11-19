@@ -12,14 +12,6 @@ return array(
 
     'fields' => array(
 
-        'id' => array(
-            'type' => 'counter',
-            'counter' => array(
-                'start' => 1,
-                'step' => 2,
-            )
-        ),
-
         'decrement' => array(
             'type' => 'counter',
             'counter' => array(
@@ -195,14 +187,22 @@ return array(
             ),
         ),
 
+        // This field will be computer but not displayed by setting the optional hide parameter to true
         'counter' => array(
             'type' => 'counter',
             'counter' => array(
                 'start' => 2,
                 'step' => 5,
             ),
+            'hide' => true,
         ),
-            
+
+        // A string expression can contain any other pre-defined field
+        'stringExpression' => array(
+            'type' => 'stringExpression',
+            'stringExpression' => '{decrement} | {datestamp} - A constant value here - {nada},{counter}-{{bosspecial}}',
+        ),
+           
         'result' => array(
             'type' => 'rules',
             // Value => condition
