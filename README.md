@@ -4,7 +4,12 @@
 
 ## Data Generator
 
-This tool provides an easy way to generate data sample and push them to something like a AWS Kinesis stream.
+This tool provides an easy way to generate data sample and push them to following targets : 
+ - Kinesis
+ - Dynamodb
+ - SQS
+ - CSV file
+ - JSON file
 
 The structure of the generated data can be defined within a configuration file. 
 
