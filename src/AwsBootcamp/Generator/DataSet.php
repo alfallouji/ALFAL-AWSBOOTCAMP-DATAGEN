@@ -67,10 +67,10 @@ class DataSet {
     protected $_counters = array();
 
     /**
-     * Array containing the current batch that will be sent to Kinesis
+     * Array containing the current batch that will be sent
      * @var array
      */
-    protected $_kinesisBatch = array();
+    protected $_currentBatch = array();
 
     /**
      * Data repository where data is being pushed to 
@@ -102,7 +102,7 @@ class DataSet {
     public function execute(array $config, $total, $batchSize) { 
         $this->_dataSet = array();
         $this->_patternFields = array();
-        $this->_kinesisBatch = array();
+        $this->_currentBatch = array();
 
         // Get list of fields for pattern replacement
         foreach ($config['fields'] as $field => $data) { 
@@ -140,12 +140,12 @@ class DataSet {
             if ($this->_validateData($this->_currentData)) {
                 ++$cpt;
                 $this->_dataSet[] = $this->_currentData;
-                $this->_kinesisBatch[] = $this->_currentData;
+                $this->_currentBatch[] = $this->_currentData;
 
                 // Push batch to kinesis 
-                if (sizeof($this->_kinesisBatch) == $batchSize) { 
-                    $this->_dataRepository->push($this->_kinesisBatch);
-                    $this->_kinesisBatch = array();
+                if (sizeof($this->_currentBatch) == $batchSize) { 
+                    $this->_dataRepository->push($this->_currentBatch);
+                    $this->_currentBatch = array();
                 }
             } else {
                 // Decrement counter (if any)
@@ -159,8 +159,8 @@ class DataSet {
         }
 
         // If anything left, push it to Kinesis
-        if (sizeof($this->_kinesisBatch) > 0) { 
-            $this->_dataRepository->push($this->_kinesisBatch);
+        if (sizeof($this->_currentBatch) > 0) { 
+            $this->_dataRepository->push($this->_currentBatch);
         }
 
         \cli::log('Example of a data entry that got generated:');
