@@ -31,7 +31,7 @@ class SQS implements IDataRepository {
     }
 
     /**
-     * Push current batch to kinesis
+     * Push current batch to SQS
      * 
      * @param array $batch Batch to push
      *
