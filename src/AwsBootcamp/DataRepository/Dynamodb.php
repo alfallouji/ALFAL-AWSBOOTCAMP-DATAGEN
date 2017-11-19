@@ -10,7 +10,7 @@ class Dynamodb implements IDataRepository {
      * Dynamodb table name
      * @var string
      */
-    protected $_tablename = null;
+    protected $_tableName = null;
 
     /**
      * Dynamodb client
@@ -21,11 +21,12 @@ class Dynamodb implements IDataRepository {
     /**
      * Class constructor
      *
-     * @param string $tablename Tablename     
+     * @param string $tableName Tablename     
+     * @param \Aws\DynamoDb\DynamoDbClient $client Dynamodb client
      * @return void
      */
-    public function __construct($tablename, Aws\Dynamodb\Client $client) { 
-        $this->_tablename = $tablename;
+    public function __construct($tableName, \Aws\DynamoDb\DynamoDbClient $client) { 
+        $this->_tableName = $tableName;
         $this->_client = $client;
     }
 
@@ -37,29 +38,18 @@ class Dynamodb implements IDataRepository {
      * @return array Result
      */
     public function push(array $batch) { 
-        $content = null;
+        $putRequest = array();
         foreach ($batch as $record) {
-            $content .=  json_encode(array('Data' => json_encode($record), 'PartitionKey' => uniqid(),)) . PHP_EOL;
+            $item = array();
+            foreach ($record as $k => $v) { 
+                $item[$k] = array('S' => (string) $v);
+            }
+            $item['id'] = array('S' => uniqid());
+            $putRequest[] = array('PutRequest' => array('Item' => $item));
         }
- 
-        \cli::log('Pushing a batch of ' . sizeof($batch) . ' records to dynamodb table : ' . $this->_tablename);
 
-        /** @todo 
-	$response = $this->_client->batchWriteItem(array(
-		"RequestItems" => array(
-		$tableName => array(
-		array(
-			"PutRequest" => array(
-				"Item" => array(
-					"id"   => array('N' => 40),
-					"type" => array('S' => "book"),
-					"title"=> array('S' => "DynamoDB Cookbook")
-				))
-		),
-		array(
-			"DeleteRequest" => array(
-			   ...
-        */
+        \cli::log('Pushing a batch of ' . sizeof($batch) . ' records to dynamodb table : ' . $this->_tableName);
+	    $result = $this->_client->batchWriteItem(array("RequestItems" => array($this->_tableName => $putRequest)));
 
         return $result;
     }
