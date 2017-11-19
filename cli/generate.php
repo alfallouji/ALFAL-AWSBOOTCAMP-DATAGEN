@@ -7,6 +7,8 @@ Generate a dataset and persist it into Kinesis, Dynamodb or local file
 
 Usage: {$_SERVER['_']} {$_SERVER['argv'][0]} OPTIONS
 
+    --batchSize                 Size of the batch (max of 25 for dynamodb and 500 for kinesis)
+    --total                     Total size of the dataset
     --isLocal                   Set the script to run in a local environment (will fetch aws credentials from config)
     --implementation=value      Implementation to use (kinesis|dynamodb|file)
     --file=value                Filename for the file implementation (e.g. /tmp/dataset.json)
@@ -23,13 +25,15 @@ EOT;
 class cli { public static function log($m) { echo '[' . date('Y-m-d H:i:s') . '] ' . $m . PHP_EOL; } }
 require __DIR__ . '/../vendor/autoload.php';
 
-$longopts = array('implementation:', 'isLocal::', 'file::', 'region::', 'configFile::', 'tableName::', 'help');
+$longopts = array('batchSize::', 'total::', 'implementation:', 'isLocal::', 'file::', 'region::', 'configFile::', 'tableName::', 'help');
 $opts = getopt(null, $longopts);
 
 if (isset($opts['help'])) { 
     die($help);
 }
 
+$batchSize = isset($opts['batchSize']) ? $opts['batchSize'] : 25;
+$total = isset($opts['total']) ? $opts['total'] : 100;
 $isLocal = isset($opts['isLocal']);
 $implementation = isset($opts['implementation']) ? $opts['implementation'] : 'file';
 $file = isset($opts['file']) ? $opts['file'] : sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dataset.json';
@@ -76,14 +80,18 @@ switch (strtolower($implementation)) {
     break;
 
     case 'dynamodb':
-    $client = Aws\DynamoDb\DynamoDbClient::factory(array(
-            'credentials' => array(
-                'key'    => $key,
-                'secret' => $secret,
-            ),
-            'region' => $region,
-            'version' => 'latest',
-    ));
+        $client = Aws\DynamoDb\DynamoDbClient::factory(array(
+                'credentials' => array(
+                    'key'    => $key,
+                    'secret' => $secret,
+                ),
+                'region' => $region,
+                'version' => 'latest',
+        ));
+        $repository = new AwsBootcamp\DataRepository\Dynamodb($tableName, $client);
+        if ($batchSize > 25) { 
+            die('Fatal Error : Batch size must be lower than 25 with dynamodb - ' . $batchSize . ' given' . PHP_EOL);
+        }
     break;
 
     default: 
@@ -93,7 +101,7 @@ switch (strtolower($implementation)) {
 
 $gen = new AwsBootcamp\Generator\DataSet($repository);
 $config = require $configFile;
-$dataSet = $gen->execute($config, 220, 50);
+$dataSet = $gen->execute($config, $total, $batchSize);
 
 echo PHP_EOL . $msg;
 echo PHP_EOL . 'Stats' . PHP_EOL;
