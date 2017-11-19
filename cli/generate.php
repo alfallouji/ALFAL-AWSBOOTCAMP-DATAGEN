@@ -1,21 +1,42 @@
 <?php
 $start = microtime(true); 
 
+$help = <<<EOT
+
+Generate a dataset and persist it into Kinesis, Dynamodb or local file
+
+Usage: {$_SERVER['_']} {$_SERVER['argv'][0]} OPTIONS
+    --isLocal          		Set the script to run in a local environment (will fetch aws credentials from config)
+    --implementation=value      Implementation to use (kinesis|dynamodb|file)
+    --file=value		Filename for the file implementation
+    --region=value		AWS region to use
+    --configFile=value		Config file 
+    --tableName=value		Dynamodb table name
+    --help                      Display this help
+
+Example: {$_SERVER['_']} {$_SERVER['argv'][0]} --isLocal --implementation=file --filename=/tmp/dataset.json
+
+EOT;
+
 class cli { public static function log($m) { echo '[' . date('Y-m-d H:i:s') . '] ' . $m . PHP_EOL; } }
 require __DIR__ . '/../vendor/autoload.php';
 
-$shortopts = 'i:d::f::r::c::';
-$opts = getopt($shortopts, array());
+$longopts = array('implementation:', 'isLocal::', 'file::', 'region::', 'configFile::', 'tableName::', 'help:::');
+$opts = getopt(null, $longopts);
 
-$isDev = isset($opts['d']) ? $opts['d'] : true;
-$implementation = isset($opts['i']) ? $opts['i'] : 'file';
-$file = isset($opts['f']) ? $opts['f'] : sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dataset.json';
-$region = isset($opts['r']) ? $opts['r'] : 'us-east-1';
-$configFile = isset($opts['c']) ? $opts['c'] : __DIR__ . '/../config/game-base.template.php';
-$tableName = isset($opts['t']) ? $opts['t'] : 'datagen-dynamo-table';
+if (isset($opts['help'])) { 
+    die($help);
+}
+
+$isLocal = isset($opts['isLocal']) ? $opts['isLocal'] : true;
+$implementation = isset($opts['implementation']) ? $opts['implementation'] : 'file';
+$file = isset($opts['file']) ? $opts['file'] : sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dataset.json';
+$region = isset($opts['region']) ? $opts['region'] : 'us-east-1';
+$configFile = isset($opts['configFile']) ? $opts['configFile'] : __DIR__ . '/../config/game-base.template.php';
+$tableName = isset($opts['tableName']) ? $opts['tableName'] : 'datagen-dynamo-table';
 
 $json = array();
-if (!$isDev) { 
+if (!$isLocal) { 
     // Fetch creds from ec2 metadata instance (if available)
     $creds = file_get_contents('http://169.254.169.254/latest/meta-data/iam/security-credentials/ec2-s3Role');
     $json = json_decode($creds, true);
@@ -47,14 +68,14 @@ switch ($implementation) {
     break;
 
     case 'dynamodb':
-		$client = Aws\DynamoDb\DynamoDbClient::factory(array(
+	$client = Aws\DynamoDb\DynamoDbClient::factory(array(
             'credentials' => array(
                 'key'    => $key,
                 'secret' => $secret,
             ),
             'region' => $region,
             'version' => 'latest',
-		));
+	));
     break;
 
     default: 
@@ -67,7 +88,6 @@ $config = require $configFile;
 $dataSet = $gen->execute($config, 220, 50);
 
 echo PHP_EOL . $msg;
-
 echo PHP_EOL . 'Stats' . PHP_EOL;
 echo '---------' . PHP_EOL;
 echo 'Total generated : ' . sizeof($dataSet);
