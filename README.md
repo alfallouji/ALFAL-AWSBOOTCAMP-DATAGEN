@@ -8,6 +8,7 @@ This tool provides an easy way to generate data sample and push them to followin
  - Kinesis
  - Dynamodb
  - SQS
+ - Cloudwatch logs
  - CSV file
  - JSON file
 
