@@ -28,7 +28,7 @@ The following features are supported :
     `{field3} equals TRUE if {field1} + {field2} < 1000`
     `{field4} equals FALSE if {field1} + {field2} >= 1000`
 - Any of the feature exposed by `fzaninotto/faker` library
-- String expression that include any other pre-defined field
+- String expression that includes any other pre-defined field
 - Ability to defined the overall distribution (e.g I want 20% of my population to have a value of 'Y' for {field3}). The generator will run until it meets the desired distribution.
 
 You can also defined the the size of the population. The generated data will be pushed to a kinesis stream by batch (size of the batch is configurable). 
