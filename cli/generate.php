@@ -15,6 +15,7 @@ Usage: {$_SERVER['_']} {$_SERVER['argv'][0]} OPTIONS
     --region=value              AWS region to use (e.g. us-east-1)
     --configFile=value          Config file (e.g. config/myconfig.php)
     --tableName=value           Dynamodb table name 
+    --queueUrl=value            URL to the SQS queue
     --help                      Display this help
 
 Example: {$_SERVER['_']} {$_SERVER['argv'][0]} --isLocal --implementation=file --filename=/tmp/dataset.json
@@ -25,7 +26,18 @@ EOT;
 class cli { public static function log($m) { echo '[' . date('Y-m-d H:i:s') . '] ' . $m . PHP_EOL; } }
 require __DIR__ . '/../vendor/autoload.php';
 
-$longopts = array('batchSize::', 'total::', 'implementation:', 'isLocal::', 'file::', 'region::', 'configFile::', 'tableName::', 'help');
+$longopts = array(
+    'batchSize::', 
+    'total::', 
+    'implementation:', 
+    'isLocal::', 
+    'file::', 
+    'region::', 
+    'configFile::', 
+    'tableName::',
+    'queueUrl::', 
+    'help'
+);
 $opts = getopt(null, $longopts);
 
 if (isset($opts['help'])) { 
@@ -40,6 +52,7 @@ $file = isset($opts['file']) ? $opts['file'] : sys_get_temp_dir() . DIRECTORY_SE
 $region = isset($opts['region']) ? $opts['region'] : 'us-east-1';
 $configFile = isset($opts['configFile']) ? $opts['configFile'] : __DIR__ . '/../config/game-base.template.php';
 $tableName = isset($opts['tableName']) ? $opts['tableName'] : 'datagen-dynamo-table';
+$queueUrl = isset($opts['queueUrl']) ? $opts['queueUrl'] : null;
 
 $credentials = array('key' => null, 'secret' => null);
 $json = array();
@@ -91,6 +104,21 @@ switch (strtolower($implementation)) {
         $repository = new AwsBootcamp\DataRepository\Dynamodb($tableName, $client);
         if ($batchSize > 25) { 
             die('Fatal Error : Batch size must be lower than 25 with dynamodb - ' . $batchSize . ' given' . PHP_EOL);
+        }
+    break;
+
+    case 'sqs':
+        $client = Aws\Sqs\SqsClient::factory(array(
+                'credentials' => array(
+                    'key'    => $key,
+                    'secret' => $secret,
+                ),
+                'region' => $region,
+                'version' => 'latest',
+        ));
+        $repository = new AwsBootcamp\DataRepository\SQS($queueUrl, $client);
+        if ($batchSize > 10) { 
+            die('Fatal Error : Batch size must be lower than 25 with sqs - ' . $batchSize . ' given' . PHP_EOL);
         }
     break;
 
