@@ -16,7 +16,8 @@ class cli { public static $log = null; public static function log($m) { self::$l
 $ec2role = 'datagenRole';
 $credentials = array('key' => null, 'secret' => null);
 $json = array();
-if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] != 'localhost') { 
+$isLocal = isset($_SERVER['HTTP_HOST']) && ($_SERVER['HTTP_HOST'] == 'localhost');
+if (!$isLocal) {
     $metadataRole = file_get_contents('http://169.254.169.254/latest/meta-data/iam/security-credentials/');
     // Fetch creds from ec2 metadata instance (if available)
     $creds = file_get_contents('http://169.254.169.254/latest/meta-data/iam/security-credentials/' . $metadataRole);
@@ -96,6 +97,12 @@ catch (\Exception $e) {
             <textarea class="form-control form-control-sm" rows="27" name="config"><?php echo json_encode($config, JSON_PRETTY_PRINT); ?></textarea>
           </div>
           <div class="form-group">
+          <?php if ($isLocal) { ?> 
+            <small>Key</small>  
+            <input class="small" type="text" name="key" value="<?php echo $key; ?>" placeholder="aws key"/>
+            <small>Secret</small>  
+            <input class="small" type="text" name="secret" value="<?php echo $secret; ?>" placeholder="aws secret"/>
+          <?php  } ?>
             <small>Region</small>  
             <input class="small" type="text" name="region" value="<?php echo $region; ?>" placeholder="aws region"/>
             <small>StreamName</small>  
