@@ -6,35 +6,38 @@ $help = <<<EOT
 Generate a dataset and persist it into Kinesis, Dynamodb or local file
 
 Usage: {$_SERVER['_']} {$_SERVER['argv'][0]} OPTIONS
-    --isLocal          		Set the script to run in a local environment (will fetch aws credentials from config)
+
+    --isLocal                   Set the script to run in a local environment (will fetch aws credentials from config)
     --implementation=value      Implementation to use (kinesis|dynamodb|file)
-    --file=value		Filename for the file implementation
-    --region=value		AWS region to use
-    --configFile=value		Config file 
-    --tableName=value		Dynamodb table name
+    --file=value                Filename for the file implementation (e.g. /tmp/dataset.json)
+    --region=value              AWS region to use (e.g. us-east-1)
+    --configFile=value          Config file (e.g. config/myconfig.php)
+    --tableName=value           Dynamodb table name 
     --help                      Display this help
 
 Example: {$_SERVER['_']} {$_SERVER['argv'][0]} --isLocal --implementation=file --filename=/tmp/dataset.json
+
 
 EOT;
 
 class cli { public static function log($m) { echo '[' . date('Y-m-d H:i:s') . '] ' . $m . PHP_EOL; } }
 require __DIR__ . '/../vendor/autoload.php';
 
-$longopts = array('implementation:', 'isLocal::', 'file::', 'region::', 'configFile::', 'tableName::', 'help:::');
+$longopts = array('implementation:', 'isLocal::', 'file::', 'region::', 'configFile::', 'tableName::', 'help');
 $opts = getopt(null, $longopts);
 
 if (isset($opts['help'])) { 
     die($help);
 }
 
-$isLocal = isset($opts['isLocal']) ? $opts['isLocal'] : true;
+$isLocal = isset($opts['isLocal']);
 $implementation = isset($opts['implementation']) ? $opts['implementation'] : 'file';
 $file = isset($opts['file']) ? $opts['file'] : sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dataset.json';
 $region = isset($opts['region']) ? $opts['region'] : 'us-east-1';
 $configFile = isset($opts['configFile']) ? $opts['configFile'] : __DIR__ . '/../config/game-base.template.php';
 $tableName = isset($opts['tableName']) ? $opts['tableName'] : 'datagen-dynamo-table';
 
+$credentials = array('key' => null, 'secret' => null);
 $json = array();
 if (!$isLocal) { 
     // Fetch creds from ec2 metadata instance (if available)
@@ -68,14 +71,14 @@ switch ($implementation) {
     break;
 
     case 'dynamodb':
-	$client = Aws\DynamoDb\DynamoDbClient::factory(array(
+    $client = Aws\DynamoDb\DynamoDbClient::factory(array(
             'credentials' => array(
                 'key'    => $key,
                 'secret' => $secret,
             ),
             'region' => $region,
             'version' => 'latest',
-	));
+    ));
     break;
 
     default: 
