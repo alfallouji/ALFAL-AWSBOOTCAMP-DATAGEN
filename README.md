@@ -27,7 +27,8 @@ The following features are supported :
  - Conditionnal rules : 
     `{field3} equals TRUE if {field1} + {field2} < 1000`
     `{field4} equals FALSE if {field1} + {field2} >= 1000`
-- Any of the feature exposed by `fzaninotto/faker` library 
+- Any of the feature exposed by `fzaninotto/faker` library
+- String expression that include any other pre-defined field
 - Ability to defined the overall distribution (e.g I want 20% of my population to have a value of 'Y' for {field3}). The generator will run until it meets the desired distribution.
 
 You can also defined the the size of the population. The generated data will be pushed to a kinesis stream by batch (size of the batch is configurable). 
@@ -182,6 +183,19 @@ You can also use the command line script generate.php.
         'field8' => array(
             'type' => 'faker',
             'property' => 'ipv4',
+        ),
+
+        // Do not display this field by setting the optional parameter hide to true
+        'field9' => array(
+            'type' => 'faker',
+            'property' => 'country',
+            'hide' => true
+        ),
+
+        // A string expression can include any pre-defined field (even the hidden ones)
+        'stringExpression' => array(
+            'type' = 'stringExpression',
+            'stringExpression' => 'IP:{field8} and field5={field5}'
         ),
 
         // You can define conditonal rules to be evaluated in order to get the value
