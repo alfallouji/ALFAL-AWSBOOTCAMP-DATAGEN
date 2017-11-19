@@ -16,6 +16,8 @@ Usage: {$_SERVER['_']} {$_SERVER['argv'][0]} OPTIONS
     --configFile=value          Config file (e.g. config/myconfig.php)
     --tableName=value           Dynamodb table name 
     --queueUrl=value            URL to the SQS queue
+    --groupName=value           Cloudwatch logs group name
+    --streamName=value          Cloudwatch logs stream name
     --help                      Display this help
 
 Example: {$_SERVER['_']} {$_SERVER['argv'][0]} --isLocal --implementation=file --filename=/tmp/dataset.json
@@ -35,7 +37,9 @@ $longopts = array(
     'region::', 
     'configFile::', 
     'tableName::',
-    'queueUrl::', 
+    'queueUrl::',
+    'groupName::',
+    'streamName::', 
     'help'
 );
 $opts = getopt(null, $longopts);
@@ -53,6 +57,8 @@ $region = isset($opts['region']) ? $opts['region'] : 'us-east-1';
 $configFile = isset($opts['configFile']) ? $opts['configFile'] : __DIR__ . '/../config/game-base.template.php';
 $tableName = isset($opts['tableName']) ? $opts['tableName'] : 'datagen-dynamo-table';
 $queueUrl = isset($opts['queueUrl']) ? $opts['queueUrl'] : null;
+$groupName = isset($opts['groupName']) ? $opts['groupName'] : null;
+$streamName = isset($opts['streamName']) ? $opts['streamName'] : null;
 
 $credentials = array('key' => null, 'secret' => null);
 $json = array();
@@ -118,8 +124,20 @@ switch (strtolower($implementation)) {
         ));
         $repository = new AwsBootcamp\DataRepository\SQS($queueUrl, $client);
         if ($batchSize > 10) { 
-            die('Fatal Error : Batch size must be lower than 25 with sqs - ' . $batchSize . ' given' . PHP_EOL);
+            die('Fatal Error : Batch size must be lower than 10 with sqs - ' . $batchSize . ' given' . PHP_EOL);
         }
+    break;
+
+    case 'cloudwatchlogs':
+        $client = Aws\CloudwatchLogs\CloudwatchLogsClient::factory(array(
+            'credentials' => array(
+                'key'    => $key,
+                'secret' => $secret,
+            ),
+            'region' => $region,
+            'version' => 'latest',
+        ));
+        $repository = new AwsBootcamp\DataRepository\CloudwatchLogs($streamName, $groupName, $client);
     break;
 
     default: 
