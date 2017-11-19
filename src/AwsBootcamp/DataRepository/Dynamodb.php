@@ -2,24 +2,31 @@
 namespace AwsBootcamp\DataRepository;
 
 /**
- * File Service
- * Class that allows to push data to a file
+ * Dynamodb Service
+ * Class that allows to push data to a dynamodb table
  */
-class File implements IDataRepository { 
+class Dynamodb implements IDataRepository { 
     /**
-     * Filename
+     * Dynamodb table name
      * @var string
      */
-    protected $_filename = null;
+    protected $_tablename = null;
 
+    /**
+     * Dynamodb client
+     * @var Aws\Dynamodb\DynamodbClient
+     */
+    protected $_client = null;
+	
     /**
      * Class constructor
      *
-     * @param string $filename File name
+     * @param string $tablename Tablename     
      * @return void
      */
-    public function __construct($filename) { 
-        $this->_filename = $filename;
+    public function __construct($tablename, Aws\Dynamodb\Client $client) { 
+        $this->_tablename = $tablename;
+        $this->_client = $client;
     }
 
     /**
@@ -35,24 +42,23 @@ class File implements IDataRepository {
             $content .=  json_encode(array('Data' => json_encode($record), 'PartitionKey' => uniqid(),)) . PHP_EOL;
         }
  
-        $result = file_put_contents($this->_filename, $content, FILE_APPEND);
-        \cli::log('Pushing a batch of ' . sizeof($batch) . ' records to file : ' . $this->_filename);
+        \cli::log('Pushing a batch of ' . sizeof($batch) . ' records to dynamodb table : ' . $this->_tablename);
 
         /** @todo 
-		$response = $client->batchWriteItem(array(
-			"RequestItems" => array(
-				$tableName => array(
-					array(
-						"PutRequest" => array(
-							"Item" => array(
-								"id"   => array('N' => 40),
-								"type" => array('S' => "book"),
-								"title"=> array('S' => "DynamoDB Cookbook")
-							))
-					),
-					array(
-						"DeleteRequest" => array(
-						   ...
+	$response = $this->_client->batchWriteItem(array(
+		"RequestItems" => array(
+		$tableName => array(
+		array(
+			"PutRequest" => array(
+				"Item" => array(
+					"id"   => array('N' => 40),
+					"type" => array('S' => "book"),
+					"title"=> array('S' => "DynamoDB Cookbook")
+				))
+		),
+		array(
+			"DeleteRequest" => array(
+			   ...
         */
 
         return $result;
