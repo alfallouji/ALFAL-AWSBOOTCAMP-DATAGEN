@@ -51,7 +51,7 @@ $key = isset($json['AccessKeyId']) ? $json['AccessKeyId'] : $credentials['key'];
 $secret = isset($json['SecretAccessKey']) ? $json['SecretAccessKey'] : $credentials['secret'];
 
 $msg = null;
-switch ($implementation) { 
+switch (strtolower($implementation)) { 
     case 'kinesis':
         $kinesis = Aws\Kinesis\KinesisClient::factory(array(
             'credentials' => array(
@@ -67,6 +67,11 @@ switch ($implementation) {
     
     case 'file':
         $repository = new AwsBootcamp\DataRepository\File($file);
+        $msg = 'Generated dataset file : ' . $file;
+    break;
+
+    case 'csv':
+        $repository = new AwsBootcamp\DataRepository\CSV($file);
         $msg = 'Generated dataset file : ' . $file;
     break;
 
