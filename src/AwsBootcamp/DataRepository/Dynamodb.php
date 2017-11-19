@@ -31,7 +31,7 @@ class Dynamodb implements IDataRepository {
     }
 
     /**
-     * Push current batch to kinesis
+     * Push current batch to dynamodb
      * 
      * @param array $batch Batch to push
      *
