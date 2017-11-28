@@ -4,19 +4,19 @@
 
 ## Data Generator
 
-This tool provides an easy way to generate data sample and push them to following targets : 
- - Kinesis Streams
- - Kinesis Firehose
- - Dynamodb
- - SQS
- - Cloudwatch logs
- - S3
- - CSV file
- - JSON file
+This tool provides an easy way to generate data sample and push them to the following targets : 
+ - Kinesis Streams (AWS)
+ - Kinesis Firehose (AWS)
+ - Dynamodb (AWS)
+ - SQS (AWS)
+ - Cloudwatch logs (AWS)
+ - S3 (AWS)
+ - CSV file (locally)
+ - JSON file (locally)
 
-The structure of the generated data can be defined within a configuration file. 
+The tool comes with a web GUI and command line script. 
 
-The following features are supported : 
+You have full control on the structure of the data that you want to generate. The structure of the generated data can be defined within a configuration file. The following features are supported : 
 
  - Random integer (within a min-max range)
  - Random element from a list
@@ -32,6 +32,7 @@ The following features are supported :
 - Any of the feature exposed by `fzaninotto/faker` library
 - String expression that includes any other pre-defined field
 - Ability to defined the overall distribution (e.g I want 20% of my population to have a value of 'Y' for {field3}). The generator will run until it meets the desired distribution.
+- Ability to hide a variable (if you only need it to compute another variable)
 
 You can also defined the the size of the population. The generated data will be pushed to a kinesis stream by batch (size of the batch is configurable). 
 
@@ -103,22 +104,27 @@ In order to run, make sure to have the following :
 For the web console, use index.php.
 
 ### Command line
-You can also use the command line script generate.php.
+You can also use the command line script generate.php. For usage help, run `php generate.php --help`.
 
 ## Keep in mind
 
-- Deploying and executing the code on an ec2 instance will provide the best performance (lower latency to push to Kinesis).
-- Speed will also depend on the number of shards that you have defined for the kinesis stream.
+- Deploying and executing the code on an ec2 instance will provide the best performance for AWS targets (low latency).
+- Speed will also depend on how you have configured some of the service (e.g. number of shards that you have defined for Kinesis Streams).
 
-## Example
+## Example of a data structure
 
     // Define the desired distribution (optional)
     'distribution' => array(
-        // We want to have 30% of our distribution with a value of 'Y' for the result field
-        // and 70% with a value of 'N'
-        'result' => array(
-            'Y' => 3,
-            'N' => 7,
+        // This allows to switch off the distribution
+        'disable' => false,
+
+        'fields' => array(
+            // We want to have 30% of our distribution with a value of 'Y' for the result field
+            // and 70% with a value of 'N'
+            'result' => array(
+                'Y' => 3,
+                'N' => 7,
+            ),
         ),
     ),
 
@@ -188,6 +194,7 @@ You can also use the command line script generate.php.
         ),
 
         // Do not display this field by setting the optional parameter hide to true
+        // This field is just used to compute the value of another field
         'field9' => array(
             'type' => 'faker',
             'property' => 'country',
@@ -197,7 +204,7 @@ You can also use the command line script generate.php.
         // A string expression can include any pre-defined field (even the hidden ones)
         'stringExpression' => array(
             'type' = 'stringExpression',
-            'stringExpression' => 'IP:{field8} and field5={field5}'
+            'stringExpression' => 'IP:{field8} and field5={field5} and country={field9}'
         ),
 
         // You can define conditonal rules to be evaluated in order to get the value
