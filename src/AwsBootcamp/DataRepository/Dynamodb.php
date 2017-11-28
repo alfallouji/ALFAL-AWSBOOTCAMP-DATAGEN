@@ -21,11 +21,11 @@ class Dynamodb implements IDataRepository {
     /**
      * Class constructor
      *
-     * @param string $tableName Tablename     
      * @param \Aws\DynamoDb\DynamoDbClient $client Dynamodb client
+     * @param string $tableName Tablename     
      * @return void
      */
-    public function __construct($tableName, \Aws\DynamoDb\DynamoDbClient $client) { 
+    public function __construct(\Aws\DynamoDb\DynamoDbClient $client, $tableName) { 
         $this->_tableName = $tableName;
         $this->_client = $client;
     }

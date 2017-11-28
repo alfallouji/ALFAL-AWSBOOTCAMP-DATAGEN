@@ -33,12 +33,12 @@ class CloudwatchLogs implements IDataRepository {
     /**
      * Class constructor
      *
+     * @param \Aws\CloudwatchLogs\CloudwatchLogsClient $client CloudwatchLogs client
      * @param string $streamName Name of the stream
      * @param string $groupName Name of the group
-     * @param \Aws\CloudwatchLogs\CloudwatchLogsClient $client CloudwatchLogs client
      * @return void
      */
-    public function __construct($streamName, $groupName, \Aws\CloudwatchLogs\CloudwatchLogsClient $client) {        
+    public function __construct(\Aws\CloudwatchLogs\CloudwatchLogsClient $client, $streamName, $groupName) {
         $this->_streamName = $streamName . '-' . uniqid();
         $this->_groupName = $groupName;
         $this->_client = $client;

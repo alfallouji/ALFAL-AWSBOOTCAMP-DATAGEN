@@ -180,6 +180,9 @@ return array(
 
             // Bucketname
             'bucketName' => 'kinesis-datagen',
+
+            // S3 file prefix
+            'prefix' => 'dgen/',
         ),
        
     ),

@@ -31,7 +31,7 @@ class Factory {
     public static function getInstance($implementation, array $params) {
         switch (strtolower($implementation)) { 
             case 'kinesis':
-                $kinesis = \Aws\Kinesis\KinesisClient::factory(array(
+                $client = \Aws\Kinesis\KinesisClient::factory(array(
                     'credentials' => array(
                         'key'    => $params['key'],
                         'secret' => $params['secret'],
@@ -40,11 +40,11 @@ class Factory {
                     'version' => 'latest',
                 ));
                 $params['streamName'] = 'elasticsearch-stream-01';
-                $repository = new \AwsBootcamp\DataRepository\Kinesis($kinesis, $params['streamName']);
+                $repository = new \AwsBootcamp\DataRepository\Kinesis($client, $params['streamName']);
             break;
         
             case 'firehose':
-                $firehose = \Aws\Firehose\FirehoseClient::factory(array(
+                $client = \Aws\Firehose\FirehoseClient::factory(array(
                     'credentials' => array(
                         'key'    => $params['key'],
                         'secret' => $params['secret'],
@@ -52,7 +52,7 @@ class Factory {
                     'region' => $params['region'],
                     'version' => 'latest',
                 ));
-                $repository = new \AwsBootcamp\DataRepository\Firehose($firehose, $params['streamName']);
+                $repository = new \AwsBootcamp\DataRepository\Firehose($client, $params['streamName']);
             break;
                     
             case 'file':
@@ -74,7 +74,7 @@ class Factory {
                         'region' => $params['region'],
                         'version' => 'latest',
                 ));
-                $repository = new \AwsBootcamp\DataRepository\Dynamodb($params['tableName'], $client);
+                $repository = new \AwsBootcamp\DataRepository\Dynamodb($client, $params['tableName']);
             break;
 
             case 'sqs':
@@ -86,7 +86,7 @@ class Factory {
                         'region' => $params['region'],
                         'version' => 'latest',
                 ));
-                $repository = new \AwsBootcamp\DataRepository\SQS($params['queueUrl'], $client);
+                $repository = new \AwsBootcamp\DataRepository\SQS($client, $params['queueUrl']);
                 if ($params['batchSize'] > 10) { 
                     throw new \Exception('Fatal Error : Batch size must be lower than 10 with sqs - ' . $params['batchSize'] . ' given' . PHP_EOL);
                 }
@@ -101,7 +101,7 @@ class Factory {
                     'region' => $params['region'],
                     'version' => 'latest',
                 ));
-                $repository = new \AwsBootcamp\DataRepository\CloudwatchLogs($params['streamName'], $params['groupName'], $client);
+                $repository = new \AwsBootcamp\DataRepository\CloudwatchLogs($client, $params['streamName'], $params['groupName']);
             break;
 
             case 's3':
@@ -113,7 +113,7 @@ class Factory {
                         'region' => $params['region'],
                         'version' => 'latest',
                 ));
-                $repository = new \AwsBootcamp\DataRepository\S3($client, $params['bucketName']);
+                $repository = new \AwsBootcamp\DataRepository\S3($client, $params['bucketName'], $params['prefix']);
             break;
 
 

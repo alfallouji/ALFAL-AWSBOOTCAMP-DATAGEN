@@ -21,11 +21,11 @@ class SQS implements IDataRepository {
     /**
      * Class constructor
      *
-     * @param string $queueUrl Queue url 
      * @param \Aws\Sqs\SqsClient $client SQS client
+     * @param string $queueUrl Queue url 
      * @return void
      */
-    public function __construct($queueUrl, \Aws\Sqs\SqsClient $client) { 
+    public function __construct(\Aws\Sqs\SqsClient $client, $queueUrl) { 
         $this->_queueUrl = $queueUrl;
         $this->_client = $client;
     }

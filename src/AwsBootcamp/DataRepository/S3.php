@@ -19,15 +19,22 @@ class S3 implements IDataRepository {
     protected $_bucketName = null;
 
     /**
+     * S3 Prefix for file
+     * @var string
+     */
+    protected $_prefix = null;
+
+    /**
      * Class constructor
      *
      * @param Aws\S3\S3Client $s3 S3 Client
      * @param string $bucketName Name of the s3 stream
      * @return void
      */
-    public function __construct(\Aws\S3\S3Client $s3, $bucketName) { 
+    public function __construct(\Aws\S3\S3Client $s3, $bucketName, $prefix) { 
         $this->_s3 = $s3;
         $this->_bucketName = $bucketName;
+        $this->_prefix = $prefix;
     }
 
     /**
@@ -45,7 +52,7 @@ class S3 implements IDataRepository {
 		$uniqid = uniqid();
 		$pathToFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $uniqid;
 		file_put_contents($pathToFile, $data);
-		$filename = 'datagen_' . $uniqid;
+		$filename = $this->_prefix . 'datagen_' . $uniqid;
         $result = $this->_s3->putObject(array(
 		    'Bucket'     => $this->_bucketName,
 		    'Key'        => $filename,
