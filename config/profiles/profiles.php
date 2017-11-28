@@ -131,5 +131,31 @@ return array(
             // SQS
             'queueUrl' => 'https://sqs.us-east-1.amazonaws.com/985419638254/sqs-datagen',
         ),
+        'sample-local-s3' => array(
+            // Short comment displayed at the top
+            'comment' => 'This template will simulate a game being run numerous times',
+
+            // Template folder name - must be similar to the folder name in profiles/
+            'templateFolder' => 'game-base',
+
+            // Total number of entries generated
+            'total' => 20,
+
+            // Size of the batch to send to Kinesis
+            'batchSize' => 10,
+
+            // Interval for loop in ms
+            'interval' => 10000,
+
+            // Region
+            'region' => 'us-east-1',
+
+            // Implementation to use 
+            'implementation' => 's3',
+
+            // Bucketname
+            'bucketName' => 'kinesis-datagen',
+        ),
+       
     ),
 );
