@@ -11,6 +11,7 @@ This tool provides an easy way to generate data sample and push them to the foll
  - SQS (AWS)
  - Cloudwatch logs (AWS)
  - S3 (AWS)
+ - Lambda (AWS)
  - CSV file (locally)
  - JSON file (locally)
 
