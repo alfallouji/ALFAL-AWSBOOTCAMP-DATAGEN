@@ -3,7 +3,7 @@
 return array(
     // List of config profiles available 
     'configProfiles' => array(
-        'sample-local-file' => array(
+        'sample-local-csv-file' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
@@ -19,14 +19,33 @@ return array(
             // Interval for loop in ms
             'interval' => 10000,
 
-            // Region
-            'region' => 'us-east-1',
+            // Implementation to use 
+            'implementation' => 'csv',
+
+            // File output
+            'file' => '/tmp/dataset.csv',
+        ),
+        'sample-local-json-file' => array(
+            // Short comment displayed at the top
+            'comment' => 'This template will simulate a game being run numerous times',
+
+            // Template folder name - must be similar to the folder name in profiles/
+            'templateFolder' => 'game-base',
+
+            // Total number of entries generated
+            'total' => 100,
+
+            // Size of the batch to send to Kinesis
+            'batchSize' => 400,
+
+            // Interval for loop in ms
+            'interval' => 10000,
 
             // Implementation to use 
             'implementation' => 'file',
 
             // File output
-            'file' => '/tmp/foo.json',
+            'file' => '/tmp/dataset.json',
         ),
         'sample-kinesis' => array(
             // Short comment displayed at the top
@@ -184,6 +203,30 @@ return array(
             // S3 file prefix
             'prefix' => 'dgen/',
         ),
-       
+        'sample-local-lambda' => array(
+            // Short comment displayed at the top
+            'comment' => 'This template will simulate a game being run numerous times',
+
+            // Template folder name - must be similar to the folder name in profiles/
+            'templateFolder' => 'game-base',
+
+            // Total number of entries generated
+            'total' => 20,
+
+            // Size of the batch to send to Kinesis
+            'batchSize' => 10,
+
+            // Interval for loop in ms
+            'interval' => 10000,
+
+            // Region
+            'region' => 'us-east-1',
+
+            // Implementation to use 
+            'implementation' => 'lambda',
+
+            // FunctionName
+            'functionName' => 'datagen-lambda-fn',
+        ),
     ),
 );

@@ -71,7 +71,7 @@ class CloudwatchLogs implements IDataRepository {
         $result = $this->_client->putLogEvents($request);
         $this->_nextSequenceToken = $result['nextSequenceToken'];
         \cli::log('SeqNumber: ' . $result['nextSequenceToken']);
-
+        
         return $result;
     }
 }

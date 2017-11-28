@@ -44,13 +44,19 @@ foreach ($configSettings as $k => $v) {
     $configSettings[$k] = isset($_REQUEST[$k]) ? $_REQUEST[$k] : $v;
 }
 
-$configSettings['config'] = isset($_REQUEST['config']) ? json_decode($_REQUEST['config'], true) : require $configFile;
+$jsonConfig = isset($_REQUEST['config']) ? $_REQUEST['config'] : json_encode(require $configFile, JSON_PRETTY_PRINT);
+$configSettings['config'] = json_decode($jsonConfig, true);
 $configSettings['key'] = isset($_REQUEST['key']) ? $_REQUEST['key'] : $defaultKey;
 $configSettings['secret'] = isset($_REQUEST['secret']) ? $_REQUEST['secret'] : $defaultSecret;
 
 try {
     $result = null;
     if (isset($_REQUEST['submit'])) { 
+        
+        if(!is_array($configSettings['config'])) { 
+            throw new \Exception('Config must be a valid json array');
+        }
+
         $factory = new AwsBootcamp\DataRepository\Factory($configSettings);
         $repository = $factory->getInstance($configSettings['implementation'], $configSettings);
         $gen = new AwsBootcamp\Generator\DataSet($repository);
@@ -109,7 +115,7 @@ catch (\Exception $e) {
         <div style="margin:30px auto; width:100%;">
         <form action="?" method="post">
           <div class="form-group col-sm-4" style="display:inline-block; vertical-align:top;">
-            <textarea class="form-control form-control-sm" rows="28" name="config"><?php echo json_encode($configSettings['config'], JSON_PRETTY_PRINT); ?></textarea>
+            <textarea class="form-control form-control-sm" rows="28" name="config"><?php echo $jsonConfig; ?></textarea>
           </div>
           <div class="col-sm-4" style="display:inline-block; vertical-align:top; text-align:right;">
             <input type="hidden" name="configProfile" value="<?php echo $configProfile; ?>" />
