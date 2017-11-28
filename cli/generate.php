@@ -13,7 +13,7 @@ Usage: {$_SERVER['_']} {$_SERVER['argv'][0]} OPTIONS
     --implementation=value      Implementation to use (kinesis|dynamodb|file)
     --file=value                Filename for the file implementation (e.g. /tmp/dataset.json)
     --region=value              AWS region to use (e.g. us-east-1)
-    --configFile=value          Config file (e.g. config/myconfig.php)
+    --profile=value             Profile to use (e.g. base)
     --tableName=value           Dynamodb table name 
     --queueUrl=value            URL to the SQS queue
     --groupName=value           Cloudwatch logs group name
@@ -35,7 +35,7 @@ $longopts = array(
     'isLocal::', 
     'file::', 
     'region::', 
-    'configFile::', 
+    'profile::', 
     'tableName::',
     'queueUrl::',
     'groupName::',
@@ -48,17 +48,12 @@ if (isset($opts['help'])) {
     die($help);
 }
 
+$isLocal = isset($opts['isLocal']);
+$profile = isset($opts['profile']) ? $opts['profile'] : 'game-base';
+$configFile = __DIR__ . '/../config/profiles/' . $profile . '/template.php';
 $batchSize = isset($opts['batchSize']) ? $opts['batchSize'] : 25;
 $total = isset($opts['total']) ? $opts['total'] : 100;
-$isLocal = isset($opts['isLocal']);
 $implementation = isset($opts['implementation']) ? $opts['implementation'] : 'file';
-$file = isset($opts['file']) ? $opts['file'] : sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dataset.json';
-$region = isset($opts['region']) ? $opts['region'] : 'us-east-1';
-$configFile = isset($opts['configFile']) ? $opts['configFile'] : __DIR__ . '/../config/game-base.template.php';
-$tableName = isset($opts['tableName']) ? $opts['tableName'] : 'datagen-dynamo-table';
-$queueUrl = isset($opts['queueUrl']) ? $opts['queueUrl'] : null;
-$groupName = isset($opts['groupName']) ? $opts['groupName'] : null;
-$streamName = isset($opts['streamName']) ? $opts['streamName'] : null;
 
 $credentials = array('key' => null, 'secret' => null);
 $json = array();
@@ -67,84 +62,26 @@ if (!$isLocal) {
     $creds = file_get_contents('http://169.254.169.254/latest/meta-data/iam/security-credentials/ec2-s3Role');
     $json = json_decode($creds, true);
 } else { 
-    $credentials = require __DIR__ . '/../config/credentials.php';
+    $credentials = require __DIR__ . '/../config/aws/credentials.php';
 }
 
-$key = isset($json['AccessKeyId']) ? $json['AccessKeyId'] : $credentials['key'];
-$secret = isset($json['SecretAccessKey']) ? $json['SecretAccessKey'] : $credentials['secret'];
+$factoryConfig['key'] = isset($json['AccessKeyId']) ? $json['AccessKeyId'] : $credentials['key'];
+$factoryConfig['secret'] = isset($json['SecretAccessKey']) ? $json['SecretAccessKey'] : $credentials['secret'];
+$factoryConfig['file'] = isset($opts['file']) ? $opts['file'] : sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dataset.json';
+$factoryConfig['region'] = isset($opts['region']) ? $opts['region'] : 'us-east-1';
+$factoryConfig['tableName'] = isset($opts['tableName']) ? $opts['tableName'] : 'datagen-dynamo-table';
+$factoryConfig['queueUrl'] = isset($opts['queueUrl']) ? $opts['queueUrl'] : null;
+$factoryConfig['groupName'] = isset($opts['groupName']) ? $opts['groupName'] : null;
+$factoryConfig['streamName'] = isset($opts['streamName']) ? $opts['streamName'] : null;
+
+cli::log('Options');
+foreach($factoryConfig as $k => $v) { 
+    cli::log($k . '=' . $v);
+}
 
 $msg = null;
-switch (strtolower($implementation)) { 
-    case 'kinesis':
-        $kinesis = Aws\Kinesis\KinesisClient::factory(array(
-            'credentials' => array(
-                'key'    => $key,
-                'secret' => $secret,
-            ),
-            'region' => $region,
-            'version' => 'latest',
-        ));
-        $streamName = 'elasticsearch-stream-01';
-        $repository = new AwsBootcamp\DataRepository\Kinesis($kinesis, $streamName);
-    break;
-    
-    case 'file':
-        $repository = new AwsBootcamp\DataRepository\File($file);
-        $msg = 'Generated dataset file : ' . $file;
-    break;
-
-    case 'csv':
-        $repository = new AwsBootcamp\DataRepository\CSV($file);
-        $msg = 'Generated dataset file : ' . $file;
-    break;
-
-    case 'dynamodb':
-        $client = Aws\DynamoDb\DynamoDbClient::factory(array(
-                'credentials' => array(
-                    'key'    => $key,
-                    'secret' => $secret,
-                ),
-                'region' => $region,
-                'version' => 'latest',
-        ));
-        $repository = new AwsBootcamp\DataRepository\Dynamodb($tableName, $client);
-        if ($batchSize > 25) { 
-            die('Fatal Error : Batch size must be lower than 25 with dynamodb - ' . $batchSize . ' given' . PHP_EOL);
-        }
-    break;
-
-    case 'sqs':
-        $client = Aws\Sqs\SqsClient::factory(array(
-                'credentials' => array(
-                    'key'    => $key,
-                    'secret' => $secret,
-                ),
-                'region' => $region,
-                'version' => 'latest',
-        ));
-        $repository = new AwsBootcamp\DataRepository\SQS($queueUrl, $client);
-        if ($batchSize > 10) { 
-            die('Fatal Error : Batch size must be lower than 10 with sqs - ' . $batchSize . ' given' . PHP_EOL);
-        }
-    break;
-
-    case 'cloudwatchlogs':
-        $client = Aws\CloudwatchLogs\CloudwatchLogsClient::factory(array(
-            'credentials' => array(
-                'key'    => $key,
-                'secret' => $secret,
-            ),
-            'region' => $region,
-            'version' => 'latest',
-        ));
-        $repository = new AwsBootcamp\DataRepository\CloudwatchLogs($streamName, $groupName, $client);
-    break;
-
-    default: 
-        throw new \Exception('Must provide a valid value for implementation');
-    break;
-}
-
+$factory = new AwsBootcamp\DataRepository\Factory($factoryConfig);
+$repository = $factory->getInstance($implementation, $factoryConfig);
 $gen = new AwsBootcamp\Generator\DataSet($repository);
 $config = require $configFile;
 $dataSet = $gen->execute($config, $total, $batchSize);

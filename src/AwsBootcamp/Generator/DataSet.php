@@ -113,8 +113,11 @@ class DataSet {
         }
 
         // Get desired distribution if any defined
-        if (isset($config['distribution'])) { 
-            foreach ($config['distribution'] as $field => $data) { 
+        $enableDistribution = isset($config['distribution']['disable']) ? !$config['distribution']['disable'] : false;
+
+        // Get desired distribution if any defined
+        if ($enableDistribution) { 
+            foreach ($config['distribution']['fields'] as $field => $data) { 
                 $sum = array_sum($data);
                 foreach ($data as $value => $weight) { 
                     $this->_expectedDistribution[$field][$value] = (int) (($weight / $sum) * $total);

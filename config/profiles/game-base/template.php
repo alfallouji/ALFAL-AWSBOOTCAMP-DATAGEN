@@ -2,11 +2,15 @@
 
 return array(
     
+
     'distribution' => array(
-        'result' => array(
-            'Won' => 51,
-            'Lost' => 42,
-            'DNF' => 7,
+        'disable' => false,
+        'fields' => array(
+            'result' => array(
+                'Won' => 51,
+                'Lost' => 42,
+                'DNF' => 7,
+            ),
         ),
     ),
 

@@ -28,7 +28,7 @@ class CloudwatchLogs implements IDataRepository {
      * Next sequence number
      * @var string
      */
-    protected $_nextSequenceToken = '49577046975324293808998647044542222926306086973125849234';
+    protected $_nextSequenceToken = null;
 
     /**
      * Class constructor
@@ -38,10 +38,14 @@ class CloudwatchLogs implements IDataRepository {
      * @param \Aws\CloudwatchLogs\CloudwatchLogsClient $client CloudwatchLogs client
      * @return void
      */
-    public function __construct($streamName, $groupName, \Aws\CloudwatchLogs\CloudwatchLogsClient $client) { 
-        $this->_streamName = $streamName;
+    public function __construct($streamName, $groupName, \Aws\CloudwatchLogs\CloudwatchLogsClient $client) {        
+        $this->_streamName = $streamName . '-' . uniqid();
         $this->_groupName = $groupName;
         $this->_client = $client;
+        $this->_client->createLogStream(array(
+            'logGroupName' => $this->_groupName, 
+            'logStreamName' => $this->_streamName
+        ));
     }
 
     /**

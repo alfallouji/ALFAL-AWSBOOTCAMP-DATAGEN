@@ -10,6 +10,7 @@ ini_set('max_execution_time', 1800);
 ini_set('memory_limit', '256M');
 
 require __DIR__ . '/../vendor/autoload.php';
+$webConfig = require __DIR__ . '/../config/profiles/profiles.php';
 
 class cli { public static $log = null; public static function log($m) { self::$log .= '[' . date('Y-m-d H:i:s') . '] ' . $m . PHP_EOL; } }
 
@@ -17,15 +18,18 @@ $ec2role = 'datagenRole';
 $credentials = array('key' => null, 'secret' => null);
 $json = array();
 $isLocal = isset($_SERVER['HTTP_HOST']) && ($_SERVER['HTTP_HOST'] == 'localhost');
+// If not locally deployed, then fetch credentials from instance role
 if (!$isLocal) {
     $metadataRole = file_get_contents('http://169.254.169.254/latest/meta-data/iam/security-credentials/');
     // Fetch creds from ec2 metadata instance (if available)
     $creds = file_get_contents('http://169.254.169.254/latest/meta-data/iam/security-credentials/' . $metadataRole);
     $json = json_decode($creds, true);
 } else { 
-    $credentialsFile = __DIR__ . '/../config/credentials.php';
+    $credentialsFile = __DIR__ . '/../config/aws/credentials.php';
     if (file_exists($credentialsFile)) { 
         $credentials = require $credentialsFile;
+    } else { 
+        die('Must provide a config/aws/credentials.php file');
     }
 }
 
@@ -33,30 +37,24 @@ $defaultKey = isset($json['AccessKeyId']) ? $json['AccessKeyId'] : $credentials[
 $defaultSecret = isset($json['SecretAccessKey']) ? $json['SecretAccessKey'] : $credentials['secret'];
 $token = isset($json['Token']) ? $json['Token'] : null;
 
-$key = isset($_REQUEST['key']) ? $_REQUEST['key'] : $defaultKey;
-$secret = isset($_REQUEST['secret']) ? $_REQUEST['secret'] : $defaultSecret;
-$region = isset($_REQUEST['region']) ? $_REQUEST['region'] : 'us-east-1';
-$streamName = isset($_REQUEST['streamName']) ? $_REQUEST['streamName'] : 'elasticsearch-stream-01';
-$config = isset($_REQUEST['config']) ? json_decode($_REQUEST['config'], true) : require __DIR__ . '/../config/game-base.template.php';
-$total = isset($_REQUEST['total']) ? $_REQUEST['total'] : 500;
-$batchSize = isset($_REQUEST['batchSize']) ? $_REQUEST['batchSize'] : 400;
+$configProfile = isset($_REQUEST['configProfile']) ? $_REQUEST['configProfile'] : key($webConfig['configProfiles']);
+$configSettings = $webConfig['configProfiles'][$configProfile];
+$configFile = __DIR__ . '/../config/profiles/' . $configSettings['templateFolder'] . '/template.php';
+foreach ($configSettings as $k => $v) { 
+    $configSettings[$k] = isset($_REQUEST[$k]) ? $_REQUEST[$k] : $v;
+}
+
+$configSettings['config'] = isset($_REQUEST['config']) ? json_decode($_REQUEST['config'], true) : require $configFile;
+$configSettings['key'] = isset($_REQUEST['key']) ? $_REQUEST['key'] : $defaultKey;
+$configSettings['secret'] = isset($_REQUEST['secret']) ? $_REQUEST['secret'] : $defaultSecret;
 
 try {
-    $kinesis = Aws\Kinesis\KinesisClient::factory(array(
-        'credentials' => array(
-            'key'    => $key,
-            'secret' => $secret,
-            'token' => $token,
-        ),
-        'region' => $region,
-        'version' => 'latest',
-    ));
-
     $result = null;
     if (isset($_REQUEST['submit'])) { 
-        $dataRepository = new AwsBootcamp\DataRepository\Kinesis($kinesis, $streamName);
-        $gen = new AwsBootcamp\Generator\DataSet($dataRepository);
-        $dataSet = $gen->execute($config, $total, $batchSize);
+        $factory = new AwsBootcamp\DataRepository\Factory($configSettings);
+        $repository = $factory->getInstance($configSettings['implementation'], $configSettings);
+        $gen = new AwsBootcamp\Generator\DataSet($repository);
+        $dataSet = $gen->execute($configSettings['config'], $configSettings['total'], $configSettings['batchSize']);
 
         $result = PHP_EOL . 'Stats' . PHP_EOL;
         $result .= '---------' . PHP_EOL;
@@ -83,40 +81,67 @@ catch (\Exception $e) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
     <style>
-        #container textarea { margin:10px auto; width:90%; background-color:white; font-size:0.7em; text-align:left; }
-        #container input.small { width:100px; margin-right:20px; }
-        #container input.tiny { width:50px; margin-right:20px; }
+        #container textarea { margin:0px auto; width:100%; background-color:white; font-size:0.7em; text-align:left; }
+        #container .whitebg { background-color:#DDD; width:350px; }
+        #container .thick { height: 30px; }
     </style>
   </head>
   <body id="container">
     <div class="site-wrapper">
       <div class="site-wrapper-inner">
+         <div class="form-group">
+            <form name="frmConfig" id="frmConfig" action="?" method="get">
+                <select class="thick" name="configProfile">
+                <?php
+                foreach ($webConfig['configProfiles'] as $v => $data) {
+                    echo '<option value="' . $v . '"';
+                    if ($v == $configProfile) { 
+                        echo ' selected="selected"';
+                    }
+                    echo '>' . $v . '</option>';
+                }
+                ?> 
+                </select>
+                <button type="submit" class="btn btn-primary">Load configuration profile</button><br />
+                <label for="exampleFormControlTextarea1">DataGenerator <?php echo isset($configSettings['comment']) ? ' - ' . $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
+            </form>
+         </div>
+        <div style="margin:30px auto; width:100%;">
         <form action="?" method="post">
-          <div class="form-group">
-            <label for="exampleFormControlTextarea1">DataGenerator - Configuration</label>
-            <textarea class="form-control form-control-sm" rows="27" name="config"><?php echo json_encode($config, JSON_PRETTY_PRINT); ?></textarea>
+          <div class="form-group col-sm-4" style="display:inline-block; vertical-align:top;">
+            <textarea class="form-control form-control-sm" rows="28" name="config"><?php echo json_encode($configSettings['config'], JSON_PRETTY_PRINT); ?></textarea>
           </div>
-          <div class="form-group">
-          <?php if ($isLocal) { ?> 
-            <small>Key</small>  
-            <input class="small" type="text" name="key" value="<?php echo $key; ?>" placeholder="aws key"/>
-            <small>Secret</small>  
-            <input class="small" type="text" name="secret" value="<?php echo $secret; ?>" placeholder="aws secret"/>
-          <?php  } ?>
-            <small>Region</small>  
-            <input class="small" type="text" name="region" value="<?php echo $region; ?>" placeholder="aws region"/>
-            <small>StreamName</small>  
-            <input class="small" type="text" name="streamName" value="<?php echo $streamName; ?>" placeholder="Kinesis streamName"/>
-            <small>Total</small>  
-            <input class="tiny" type="text" name="total" value="<?php echo $total; ?>" placeholder="total"/>
-            <small>BatchSize</small>  
-            <input class="tiny" type="text" name="batchSize" value="<?php echo $batchSize; ?>" placeholder="batchSize"/>
-            <button type="submit" class="btn btn-primary" id="submit" name="submit">Generate</button>
+          <div class="col-sm-4" style="display:inline-block; vertical-align:top; text-align:right;">
+            <input type="hidden" name="configProfile" value="<?php echo $configProfile; ?>" />
+            <input type="hidden" name="implementation" value="<?php echo $configSettings['implementation']; ?>" />
+          <?php 
+            foreach ($configSettings as $k => $v) { 
+                if ($k == 'config' || $k == 'comment' || $v === null) 
+                    continue;
+          
+                if (!$isLocal && ($k == 'key' || $k == 'secret')) 
+                    continue;
+          ?>
+          <div class="form-group row col-sm-8">
+            <label class="col-sm-6 col-form-label col-form-label-sm" for="<?php echo $k; ?>"><?php echo ucfirst($k); ?></label>
+            <div class="col-sm-6">
+                <input class="form-control-plaintext form-control-sm text-dark whitebg" type="text" id="<?php echo $k; ?>" name="<?php echo $k; ?>" value="<?php echo $v; ?>" placeholder="aws <?php echo $k; ?>"/>
+            </div>
+          </div>
+          <?php } ?>
+          <div class="form-group row">
+            <button style="width:350px; margin-left:190px;" type="submit" class="btn btn-primary" id="submit" name="submit">Generate</button>
+          </div>
           </div>
         </form>
+        </div>
         <?php if($result) { ?>
         <h4>Result</h4> 
-        <textarea class="form-control form-control-sm" rows="10" id="result"><?php echo cli::$log . PHP_EOL . $result; ?></textarea>
+        <div style="margin:0px auto; width:100%;">
+          <div class="form-group col-sm-8" style="display:inline-block; vertical-align:top;">
+            <textarea class="form-control form-control-sm" rows="10" id="result"><?php echo cli::$log . PHP_EOL . $result; ?></textarea>
+          </div>
+        </div>
         <?php } ?>
       </div>
     </div>
