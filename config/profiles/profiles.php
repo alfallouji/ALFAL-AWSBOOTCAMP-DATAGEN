@@ -28,6 +28,31 @@ return array(
             // File output
             'file' => '/tmp/foo.json',
         ),
+        'sample-kinesis' => array(
+            // Short comment displayed at the top
+            'comment' => 'This template will generate some player profile data',
+
+            // Template folder name - must be similar to the folder name in profiles/
+            'templateFolder' => 'sample',
+
+            // Name of an existing Kiensis stream
+            'streamName' => 'workshopAnalyticsStream',
+
+            // Total number of entries generated
+            'total' => 1000,
+
+            // Size of the batch to send to Kinesis
+            'batchSize' => 500,
+
+            // Interval for loop in ms
+            'interval' => 20000,
+
+            // Region
+            'region' => 'us-east-1',
+
+            // Implementation to use 
+            'implementation' => 'firehose',
+        ),
         'sample-firehose' => array(
             // Short comment displayed at the top
             'comment' => 'This template will generate some player profile data',
