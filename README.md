@@ -5,10 +5,12 @@
 ## Data Generator
 
 This tool provides an easy way to generate data sample and push them to following targets : 
- - Kinesis
+ - Kinesis Streams
+ - Kinesis Firehose
  - Dynamodb
  - SQS
  - Cloudwatch logs
+ - S3
  - CSV file
  - JSON file
 
