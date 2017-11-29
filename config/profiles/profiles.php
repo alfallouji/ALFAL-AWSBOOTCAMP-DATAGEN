@@ -97,7 +97,7 @@ return array(
             // Implementation to use 
             'implementation' => 'firehose',
         ),
-         'sample-local-dynamodb' => array(
+         'sample-dynamodb' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
@@ -122,7 +122,7 @@ return array(
             // Table name
             'tableName' => 'datagen-entries',
         ),
-        'sample-local-cloudwatch' => array(
+        'sample-cloudwatch' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
@@ -150,7 +150,7 @@ return array(
             // Log stream name
             'streamName' => 'stream-datagen',
         ),
-        'sample-local-sqs' => array(
+        'sample-sqs' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
@@ -175,7 +175,7 @@ return array(
             // SQS
             'queueUrl' => 'https://sqs.us-east-1.amazonaws.com/985419638254/sqs-datagen',
         ),
-        'sample-local-s3' => array(
+        'sample-s3' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
@@ -203,7 +203,7 @@ return array(
             // S3 file prefix
             'prefix' => 'dgen/',
         ),
-        'sample-local-lambda' => array(
+        'sample-lambda' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
