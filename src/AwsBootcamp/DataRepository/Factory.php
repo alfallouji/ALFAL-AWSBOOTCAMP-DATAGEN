@@ -38,9 +38,12 @@ class Factory {
 
         $config = array(
             'credentials' => $credentials,
-            'region' => $params['region'],
             'version' => 'latest'
         );
+       
+        if (isset($params['region'])) {
+            $config['region'] = $params['region'];
+        }
 
         switch (strtolower($implementation)) { 
             case 'kinesis':
