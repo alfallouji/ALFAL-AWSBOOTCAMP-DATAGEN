@@ -70,7 +70,7 @@ return array(
             'region' => 'us-east-1',
 
             // Implementation to use 
-            'implementation' => 'firehose',
+            'implementation' => 'kinesis',
         ),
         'sample-aws-firehose' => array(
             // Short comment displayed at the top

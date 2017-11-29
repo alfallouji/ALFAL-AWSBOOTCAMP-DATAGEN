@@ -109,17 +109,18 @@ catch (\Exception $e) {
             <div class="dropdown-menu" aria-labelledby="dropdown01">
                 <?php
                 foreach ($webConfig['configProfiles'] as $v => $data) {
-                    echo '<a class="dropdown-item" href="?configProfile=' . $v . '">' . $v . '</a>';
+                    echo '<a class="dropdown-item" href="?configProfile=' . $v . '"';
                     if ($v == $configProfile) { 
-                        echo '';
+                        echo ' style="background-color:#BBB;"';
                     }
+                    echo '">' . $v . '</a>';
                 }
                 ?> 
             </div>
           </li>
         </ul>
       </div>
-      <label><?php echo isset($configSettings['comment']) ? $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
+      <label><?php echo isset($configSettings['comment']) ? $configProfile . ' | ' . $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
     </nav>
     <div class="site-wrapper">
       <div class="site-wrapper-inner">
