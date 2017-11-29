@@ -47,7 +47,7 @@ return array(
             // File output
             'file' => '/tmp/dataset.json',
         ),
-        'sample-kinesis' => array(
+        'sample-aws-kinesis' => array(
             // Short comment displayed at the top
             'comment' => 'This template will generate some player profile data',
 
