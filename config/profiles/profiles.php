@@ -72,7 +72,7 @@ return array(
             // Implementation to use 
             'implementation' => 'firehose',
         ),
-        'sample-firehose' => array(
+        'sample-aws-firehose' => array(
             // Short comment displayed at the top
             'comment' => 'This template will generate some player profile data',
 
@@ -96,8 +96,8 @@ return array(
 
             // Implementation to use 
             'implementation' => 'firehose',
-        ),
-         'sample-dynamodb' => array(
+         ),
+         'sample-aws-dynamodb' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
@@ -122,7 +122,7 @@ return array(
             // Table name
             'tableName' => 'datagen-entries',
         ),
-        'sample-cloudwatch' => array(
+        'sample-aws-cloudwatch' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
@@ -150,7 +150,7 @@ return array(
             // Log stream name
             'streamName' => 'stream-datagen',
         ),
-        'sample-sqs' => array(
+        'sample-aws-sqs' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
@@ -175,7 +175,7 @@ return array(
             // SQS
             'queueUrl' => 'https://sqs.us-east-1.amazonaws.com/985419638254/sqs-datagen',
         ),
-        'sample-s3' => array(
+        'sample-aws-s3' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
@@ -203,7 +203,7 @@ return array(
             // S3 file prefix
             'prefix' => 'dgen/',
         ),
-        'sample-lambda' => array(
+        'sample-aws-lambda' => array(
             // Short comment displayed at the top
             'comment' => 'This template will simulate a game being run numerous times',
 
