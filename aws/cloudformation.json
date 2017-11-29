@@ -115,6 +115,15 @@
                                 {
                                     "Effect": "Allow",
                                     "Action": [
+                                         "lambda:InvokeFunction"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
                                         "logs:CreateLogStream",
                                         "logs:PutLogEvents"
                                     ],
@@ -141,7 +150,7 @@
                                 },
                                 {
                                     "Effect": "Allow",
-                                    "Action": "sqs:SendMessageBatch",
+                                    "Action": "sqs:SendMessage",
                                     "Resource": [
                                         "*"
                                     ]
@@ -153,8 +162,8 @@
                                         "s3:getObject"
                                     ],
                                     "Resource": [
-										"*"
-									]
+                                        "*"
+                                    ]
                                 }
                             ]
                         }
