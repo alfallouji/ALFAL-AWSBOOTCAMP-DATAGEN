@@ -96,24 +96,34 @@ catch (\Exception $e) {
     </style>
   </head>
   <body id="container">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand" href="?">DataGen</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Configuration Profile</a>
+            <div class="dropdown-menu" aria-labelledby="dropdown01">
+                <?php
+                foreach ($webConfig['configProfiles'] as $v => $data) {
+                    echo '<a class="dropdown-item" href="?configProfile=' . $v . '">' . $v . '</a>';
+                    if ($v == $configProfile) { 
+                        echo '';
+                    }
+                }
+                ?> 
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
     <div class="site-wrapper">
       <div class="site-wrapper-inner">
          <div class="form-group">
-            <form name="frmConfig" id="frmConfig" action="?" method="get">
-                <select class="thick" name="configProfile">
-                <?php
-                foreach ($webConfig['configProfiles'] as $v => $data) {
-                    echo '<option value="' . $v . '"';
-                    if ($v == $configProfile) { 
-                        echo ' selected="selected"';
-                    }
-                    echo '>' . $v . '</option>';
-                }
-                ?> 
-                </select>
-                <button type="submit" class="btn btn-primary">Load configuration profile</button><br />
-                <label for="exampleFormControlTextarea1">DataGenerator <?php echo isset($configSettings['comment']) ? ' - ' . $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
-            </form>
+            <label for="exampleFormControlTextarea1">DataGenerator <?php echo isset($configSettings['comment']) ? ' - ' . $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
          </div>
         <div style="margin:30px auto; width:100%;">
         <form action="?" method="post">
