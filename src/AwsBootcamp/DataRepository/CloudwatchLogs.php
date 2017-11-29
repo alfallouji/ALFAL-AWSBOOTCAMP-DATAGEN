@@ -59,7 +59,7 @@ class CloudwatchLogs implements IDataRepository {
         $entries = array();
         foreach ($batch as $record) {
             $message = json_encode($record);
-            $events[] = array('timestamp' => time(), 'message' => $message);
+            $events[] = array('timestamp' => round(microtime(true) * 1000), 'message' => $message);
         }
 
         \cli::log('Pushing a batch of ' . sizeof($batch) . ' records to cloudwatch logs : ' . $this->_streamName . ' - ' . $this->_groupName);
@@ -70,7 +70,6 @@ class CloudwatchLogs implements IDataRepository {
 
         $result = $this->_client->putLogEvents($request);
         $this->_nextSequenceToken = $result['nextSequenceToken'];
-        \cli::log('SeqNumber: ' . $result['nextSequenceToken']);
         
         return $result;
     }
