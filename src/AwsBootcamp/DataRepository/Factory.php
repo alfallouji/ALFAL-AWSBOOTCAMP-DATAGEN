@@ -29,29 +29,27 @@ class Factory {
      * @return IDataRepository Instance of a class implementing IDataRepository
      */
     public static function getInstance($implementation, array $params) {
+
+        $credentials['key'] = $params['key'];
+        $credentials['secret'] = $params['secret'];
+        if (isset($params['token'])) { 
+            $credentials['token'] = $params['token'];
+        }
+
+        $config = array(
+            'credentials' => $credentials,
+            'region' => $params['region'],
+            'version' => 'latest'
+        );
+
         switch (strtolower($implementation)) { 
             case 'kinesis':
-                $client = \Aws\Kinesis\KinesisClient::factory(array(
-                    'credentials' => array(
-                        'key'    => $params['key'],
-                        'secret' => $params['secret'],
-                    ),
-                    'region' => $params['region'],
-                    'version' => 'latest',
-                ));
-                $params['streamName'] = 'elasticsearch-stream-01';
+                $client = \Aws\Kinesis\KinesisClient::factory($config);
                 $repository = new \AwsBootcamp\DataRepository\Kinesis($client, $params['streamName']);
             break;
         
             case 'firehose':
-                $client = \Aws\Firehose\FirehoseClient::factory(array(
-                    'credentials' => array(
-                        'key'    => $params['key'],
-                        'secret' => $params['secret'],
-                    ),
-                    'region' => $params['region'],
-                    'version' => 'latest',
-                ));
+                $client = \Aws\Firehose\FirehoseClient::factory($config);
                 $repository = new \AwsBootcamp\DataRepository\Firehose($client, $params['streamName']);
             break;
                     
@@ -66,26 +64,12 @@ class Factory {
             break;
 
             case 'dynamodb':
-               $client = \Aws\DynamoDb\DynamoDbClient::factory(array(
-                        'credentials' => array(
-                            'key'    => $params['key'],
-                            'secret' => $params['secret'],
-                        ),
-                        'region' => $params['region'],
-                        'version' => 'latest',
-                ));
+                $client = \Aws\DynamoDb\DynamoDbClient::factory($config);
                 $repository = new \AwsBootcamp\DataRepository\Dynamodb($client, $params['tableName']);
             break;
 
             case 'sqs':
-                $client = \Aws\Sqs\SqsClient::factory(array(
-                        'credentials' => array(
-                            'key'    => $params['key'],
-                            'secret' => $params['secret'],
-                        ),
-                        'region' => $params['region'],
-                        'version' => 'latest',
-                ));
+                $client = \Aws\Sqs\SqsClient::factory($config);
                 $repository = new \AwsBootcamp\DataRepository\SQS($client, $params['queueUrl']);
                 if ($params['batchSize'] > 10) { 
                     throw new \Exception('Fatal Error : Batch size must be lower than 10 with sqs - ' . $params['batchSize'] . ' given' . PHP_EOL);
@@ -93,38 +77,17 @@ class Factory {
             break;
 
             case 'cloudwatchlogs':
-                $client = \Aws\CloudwatchLogs\CloudwatchLogsClient::factory(array(
-                    'credentials' => array(
-                        'key'    => $params['key'],
-                        'secret' => $params['secret'],
-                    ),
-                    'region' => $params['region'],
-                    'version' => 'latest',
-                ));
+                $client = \Aws\CloudwatchLogs\CloudwatchLogsClient::factory($config);
                 $repository = new \AwsBootcamp\DataRepository\CloudwatchLogs($client, $params['streamName'], $params['groupName']);
             break;
 
             case 's3':
-                $client = \Aws\S3\S3Client::factory(array(
-                        'credentials' => array(
-                            'key'    => $params['key'],
-                            'secret' => $params['secret'],
-                        ),
-                        'region' => $params['region'],
-                        'version' => 'latest',
-                ));
+                $client = \Aws\S3\S3Client::factory($config);
                 $repository = new \AwsBootcamp\DataRepository\S3($client, $params['bucketName'], $params['prefix']);
             break;
 
             case 'lambda':
-                $client = \Aws\Lambda\LambdaClient::factory(array(
-                        'credentials' => array(
-                            'key'    => $params['key'],
-                            'secret' => $params['secret'],
-                        ),
-                        'region' => $params['region'],
-                        'version' => 'latest',
-                ));
+                $client = \Aws\Lambda\LambdaClient::factory($config);
                 $repository = new \AwsBootcamp\DataRepository\Lambda($client, $params['functionName']);
             break;
 

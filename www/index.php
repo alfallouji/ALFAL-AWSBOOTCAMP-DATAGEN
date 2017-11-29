@@ -48,6 +48,9 @@ $jsonConfig = isset($_REQUEST['config']) ? $_REQUEST['config'] : json_encode(req
 $configSettings['config'] = json_decode($jsonConfig, true);
 $configSettings['key'] = isset($_REQUEST['key']) ? $_REQUEST['key'] : $defaultKey;
 $configSettings['secret'] = isset($_REQUEST['secret']) ? $_REQUEST['secret'] : $defaultSecret;
+if ($token) { 
+    $configSettings['token'] = $token;
+}
 
 try {
     $result = null;

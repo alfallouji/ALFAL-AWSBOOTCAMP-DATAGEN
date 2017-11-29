@@ -100,22 +100,69 @@
                         {
                             "Effect": "Allow",
                             "Principal": {
-                                "Service": [
-                                    "ec2.amazonaws.com"
-                                ]
+                                "Service": "ec2.amazonaws.com"
                             },
-                            "Action": [
-                                "sts:AssumeRole"
-                            ]
+                            "Action": "sts:AssumeRole"
                         }
                     ]
                 },
-                "ManagedPolicyArns": [
-                    "arn:aws:iam::aws:policy/AmazonKinesisFullAccess",
-                    "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+                "Policies": [
+                    {
+                        "PolicyName": "DatagenPolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "firehose:PutRecordBatch",
+                                        "kinesis:PutRecords"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": "dynamodb:BatchWriteItem",
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": "sqs:SendMessageBatch",
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:putObject",
+                                        "s3:getObject"
+                                    ],
+                                    "Resource": [
+										"*"
+									]
+                                }
+                            ]
+                        }
+                    }
                 ]
             }
         },
+
         "datagenRoleProfile": {
             "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
