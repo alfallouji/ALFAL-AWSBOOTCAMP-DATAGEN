@@ -80,7 +80,7 @@ class Factory {
             break;
 
             case 'cloudwatchlogs':
-                $client = \Aws\CloudwatchLogs\CloudwatchLogsClient::factory($config);
+                $client = \Aws\CloudWatchLogs\CloudWatchLogsClient::factory($config);
                 $repository = new \AwsBootcamp\DataRepository\CloudwatchLogs($client, $params['streamName'], $params['groupName']);
             break;
 
