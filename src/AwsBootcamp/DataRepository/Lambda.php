@@ -60,10 +60,7 @@ class Lambda implements IDataRepository {
      * @return array Result
      */
     public function push(array $batch) { 
-        $data = null;
-        foreach ($batch as $record) { 
-            $data .= json_encode($record) . PHP_EOL;
-        }
+        $data = json_encode($batch);
 
 		$result = $this->_lambda->invoke(array(
 			// FunctionName is required
@@ -73,7 +70,6 @@ class Lambda implements IDataRepository {
 			'ClientContext' => $this->_clientContext,
 			'Payload' => $data,
 		));
-
 		\cli::log('Pushing to lambda a payload of ' . sizeof($batch) . ' records to ' . $this->_functionName);
 
         return $result;
