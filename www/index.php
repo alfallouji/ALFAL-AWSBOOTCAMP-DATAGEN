@@ -101,7 +101,6 @@ catch (\Exception $e) {
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item dropdown">
@@ -119,12 +118,10 @@ catch (\Exception $e) {
           </li>
         </ul>
       </div>
+      <label><?php echo isset($configSettings['comment']) ? $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
     </nav>
     <div class="site-wrapper">
       <div class="site-wrapper-inner">
-         <div class="form-group">
-            <label for="exampleFormControlTextarea1">DataGenerator <?php echo isset($configSettings['comment']) ? ' - ' . $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
-         </div>
         <div style="margin:30px auto; width:100%;">
         <form action="?" method="post">
           <div class="form-group col-sm-4" style="display:inline-block; vertical-align:top;">
