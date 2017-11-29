@@ -51,6 +51,7 @@ $configSettings['secret'] = isset($_REQUEST['secret']) ? $_REQUEST['secret'] : $
 if ($token) { 
     $configSettings['token'] = $token;
 }
+$loop = isset($_REQUEST['loop']) ? $_REQUEST['loop'] : false;
 
 try {
     $result = null;
@@ -124,7 +125,7 @@ catch (\Exception $e) {
       <div class="site-wrapper-inner">
         <div style="margin:30px auto; width:100%;">
         <form action="?" method="post">
-          <div class="form-group col-sm-4" style="display:inline-block; vertical-align:top;">
+          <div class="form-group col-sm-4" style="display:inline-block;">
             <textarea class="form-control form-control-sm" rows="28" name="config"><?php echo $jsonConfig; ?></textarea>
           </div>
           <div class="col-sm-4" style="display:inline-block; vertical-align:top; text-align:right;">
@@ -145,8 +146,10 @@ catch (\Exception $e) {
             </div>
           </div>
           <?php } ?>
-          <div class="form-group row">
-            <button style="width:350px; margin-left:190px;" type="submit" class="btn btn-primary" id="submit" name="submit">Generate</button>
+          <div class="form-group row" style="margin-left:175px;">
+            <button style="width:350px;margin-bottom:10px;" type="submit" class="btn btn-primary" id="submit" name="submit">Generate</button>
+            <input style="margin-right:10px;margin-top:4px;" class="tiny" type="checkbox" id="loop" name="loop" placeholder="loop" value="1" <?php if ($loop) { echo 'checked="checked"'; } ?> />
+            <label for="loop">Sending in loop</label>
           </div>
           </div>
         </form>
@@ -163,3 +166,19 @@ catch (\Exception $e) {
     </div>
   </body>
 </html>
+<script>
+var interval = null;
+$(document).ready(function() {
+<?php if ($loop && isset($_REQUEST['submit'])) { ?>
+	interval = setInterval(function() { refreshPage(); }, <?php echo $configSettings['interval']; ?>);
+    $('#loop').change(function() {
+        if(!this.checked) {
+			clearInterval(interval);
+		}
+    });
+<?php } ?> 
+	function refreshPage() { 
+		$('#submit').click();
+	}
+});
+</script>
