@@ -138,7 +138,7 @@ catch (\Exception $e) {
                 if ($k == 'config' || $k == 'comment' || $v === null) 
                     continue;
           
-                if (!$isLocal && ($k == 'key' || $k == 'secret')) 
+                if (!$isLocal && ($k == 'key' || $k == 'secret' || $k == 'token')) 
                     continue;
           ?>
           <div class="form-group row col-sm-8">
