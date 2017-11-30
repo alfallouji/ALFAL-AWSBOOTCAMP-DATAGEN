@@ -56,7 +56,6 @@ $loop = isset($_REQUEST['loop']) ? $_REQUEST['loop'] : false;
 try {
     $result = null;
     if (isset($_REQUEST['submit'])) { 
-        
         if(!is_array($configSettings['config'])) { 
             throw new \Exception('Config must be a valid json array');
         }
@@ -120,6 +119,9 @@ catch (\Exception $e) {
           </li>
         </ul>
       </div>
+      <?php if ($loop && isset($_REQUEST['submit'])) { ?>
+      <label style="margin-right:7px;" id="counter"></label> 
+      <?php } ?>
       <label><?php echo isset($configSettings['comment']) ? $configProfile . ' | ' . $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
     </nav>
     <div class="site-wrapper">
@@ -134,23 +136,24 @@ catch (\Exception $e) {
             <input type="hidden" name="implementation" value="<?php echo $configSettings['implementation']; ?>" />
           <?php 
             foreach ($configSettings as $k => $v) { 
-                if ($k == 'config' || $k == 'comment' || $v === null) 
+                if ($k == 'config' || $k == 'comment' || $k == 'interval' || $v === null) 
                     continue;
-          
                 if (!$isLocal && ($k == 'key' || $k == 'secret' || $k == 'token')) 
                     continue;
           ?>
           <div class="form-group row col-sm-8">
             <label class="col-sm-6 col-form-label col-form-label-sm" for="<?php echo $k; ?>"><?php echo ucfirst($k); ?></label>
             <div class="col-sm-6">
-                <input class="form-control-plaintext form-control-sm text-dark whitebg" type="text" id="<?php echo $k; ?>" name="<?php echo $k; ?>" value="<?php echo $v; ?>" placeholder="aws <?php echo $k; ?>"/>
+                <input class="form-control-plaintext form-control-sm text-dark whitebg" type="text" 
+                    id="<?php echo $k; ?>" name="<?php echo $k; ?>" value="<?php echo $v; ?>" placeholder="aws <?php echo $k; ?>"/>
             </div>
           </div>
           <?php } ?>
           <div class="form-group row" style="margin-left:175px;">
             <button style="width:350px;margin-bottom:10px;" type="submit" class="btn btn-primary" id="submit" name="submit">Generate</button>
             <input style="margin-right:10px;margin-top:4px;" class="tiny" type="checkbox" id="loop" name="loop" placeholder="loop" value="1" <?php if ($loop) { echo 'checked="checked"'; } ?> />
-            <label for="loop">Sending in loop</label>
+            <label for="loop">Resend every</label>
+            <input style="margin:0px 10px 0px 20px;width:150px;font-size:0.8em;height:30px;" type="text" id="interval" name="interval" value="<?php echo $configSettings['interval']; ?>"/> (ms)
           </div>
           </div>
         </form>
@@ -171,7 +174,17 @@ catch (\Exception $e) {
 var interval = null;
 $(document).ready(function() {
 <?php if ($loop && isset($_REQUEST['submit'])) { ?>
-	interval = setInterval(function() { refreshPage(); }, <?php echo $configSettings['interval']; ?>);
+    var cpt = <?php echo $configSettings['interval']/1000; ?>;
+    interval = setInterval(function() {
+        if (cpt ==  0) { 
+            refreshPage();
+        }     
+        if (cpt > 0) {   
+            --cpt;
+            $('#counter').html('Resend in ' + cpt + ' |');
+        }
+    }, 1000);
+
     $('#loop').change(function() {
         if(!this.checked) {
 			clearInterval(interval);
