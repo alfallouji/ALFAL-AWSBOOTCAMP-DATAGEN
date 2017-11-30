@@ -10,7 +10,7 @@ Usage: {$_SERVER['_']} {$_SERVER['argv'][0]} OPTIONS
     --batchSize                 Size of the batch (max of 25 for dynamodb and 500 for kinesis)
     --total                     Total size of the dataset
     --isLocal                   Set the script to run in a local environment (will fetch aws credentials from config)
-    --implementation=value      Implementation to use (kinesis|dynamodb|file)
+    --implementation=value      Implementation to use (kinesis|firehose|sqs|cloudwatchlogs|dynamodb|s3|lambda|file|csv)
     --file=value                Filename for the file implementation (e.g. /tmp/dataset.json)
     --region=value              AWS region to use (e.g. us-east-1)
     --profile=value             Profile to use (e.g. base)
