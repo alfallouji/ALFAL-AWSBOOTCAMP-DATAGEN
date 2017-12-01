@@ -39,7 +39,7 @@ $token = isset($json['Token']) ? $json['Token'] : null;
 
 $configProfile = isset($_REQUEST['configProfile']) ? $_REQUEST['configProfile'] : key($webConfig['configProfiles']);
 $configSettings = $webConfig['configProfiles'][$configProfile];
-$configFile = __DIR__ . '/../config/profiles/' . $configSettings['templateFolder'] . '/template.php';
+$configFile = __DIR__ . '/../config/templates/' . $configSettings['templateFolder'] . '/template.php';
 foreach ($configSettings as $k => $v) { 
     $configSettings[$k] = isset($_REQUEST[$k]) ? $_REQUEST[$k] : $v;
 }
