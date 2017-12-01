@@ -85,6 +85,7 @@ catch (\Exception $e) {
     <title>DataGenerator</title>
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="http://getbootstrap.com/docs/4.0/examples/cover/cover.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
@@ -120,7 +121,7 @@ catch (\Exception $e) {
         </ul>
       </div>
       <?php if ($loop && isset($_REQUEST['submit'])) { ?>
-      <label style="margin-right:7px;" id="counter"></label> 
+      <label style="margin:0px 10px 5px 0px;" class="badge badge-pill badge-primary" id="counter"></label> 
       <?php } ?>
       <label><?php echo isset($configSettings['comment']) ? $configProfile . ' | ' . $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
     </nav>
@@ -178,20 +179,23 @@ $(document).ready(function() {
     interval = setInterval(function() {
         if (cpt ==  0) { 
             refreshPage();
+            clearInterval(interval);
         }     
         if (cpt > 0) {   
+            $('#counter').html('Resend in ' + cpt );
             --cpt;
-            $('#counter').html('Resend in ' + cpt + ' |');
         }
     }, 1000);
 
     $('#loop').change(function() {
         if(!this.checked) {
-			clearInterval(interval);
+            $('#counter').html('Resend cancelled');
+            clearInterval(interval);
 		}
     });
 <?php } ?> 
-	function refreshPage() { 
+    function refreshPage() {
+        $('#counter').html('<i class="fa fa-refresh fa-spin" style="font-size:24px"></i>');
 		$('#submit').click();
 	}
 });
