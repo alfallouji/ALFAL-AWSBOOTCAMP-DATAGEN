@@ -97,7 +97,7 @@ catch (\Exception $e) {
         #container .divtext { margin:0px auto; width:100%; background-color:white; font-size:0.7em; text-align:left; }
         #container .whitebg { background-color:#DDD; width:350px; }
         #container .thick { height: 30px; }
-        #container a { color:blue; }
+        #container #config a { color:blue; }
     </style>
   </head>
   <body id="container">
