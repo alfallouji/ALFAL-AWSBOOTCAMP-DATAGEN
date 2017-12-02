@@ -40,17 +40,18 @@ $token = isset($json['Token']) ? $json['Token'] : null;
 $configProfile = isset($_REQUEST['configProfile']) ? $_REQUEST['configProfile'] : key($webConfig['configProfiles']);
 $configSettings = $webConfig['configProfiles'][$configProfile];
 $configFile = __DIR__ . '/../config/templates/' . $configSettings['templateFolder'] . '/template.php';
-foreach ($configSettings as $k => $v) { 
-    $configSettings[$k] = isset($_REQUEST[$k]) ? $_REQUEST[$k] : $v;
-}
 
-$jsonConfig = isset($_REQUEST['config']) ? $_REQUEST['config'] : json_encode(require $configFile, JSON_PRETTY_PRINT);
-$configSettings['config'] = json_decode($jsonConfig, true);
 $configSettings['key'] = isset($_REQUEST['key']) ? $_REQUEST['key'] : $defaultKey;
 $configSettings['secret'] = isset($_REQUEST['secret']) ? $_REQUEST['secret'] : $defaultSecret;
 if ($token) { 
     $configSettings['token'] = $token;
 }
+
+foreach ($configSettings as $k => $v) { 
+    $configSettings[$k] = isset($_REQUEST[$k]) ? $_REQUEST[$k] : $v;
+}
+$jsonConfig = isset($_REQUEST['config']) ? $_REQUEST['config'] : json_encode(require $configFile, JSON_PRETTY_PRINT);
+$configSettings['config'] = json_decode($jsonConfig, true);
 $loop = isset($_REQUEST['loop']) ? $_REQUEST['loop'] : false;
 
 try {
@@ -90,10 +91,13 @@ catch (\Exception $e) {
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <link href="css/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script src="js/jsoneditor.min.js"></script>
     <style>
-        #container textarea { margin:0px auto; width:100%; background-color:white; font-size:0.7em; text-align:left; }
+        #container .divtext { margin:0px auto; width:100%; background-color:white; font-size:0.7em; text-align:left; }
         #container .whitebg { background-color:#DDD; width:350px; }
         #container .thick { height: 30px; }
+        #container a { color:blue; }
     </style>
   </head>
   <body id="container">
@@ -127,12 +131,13 @@ catch (\Exception $e) {
     </nav>
     <div class="site-wrapper">
       <div class="site-wrapper-inner">
-        <div style="margin:30px auto; width:100%;">
-        <form action="?" method="post">
+        <div style="margin:100px auto 30px auto; width:100%;">
+        <form action="?" method="post" id="frm" name="frm">
           <div class="form-group col-sm-4" style="display:inline-block;">
-            <textarea class="form-control form-control-sm" rows="28" name="config"><?php echo $jsonConfig; ?></textarea>
+            <div class="divtext form-control form-control-sm" style="height:500px;" name="configJson" id="configJson"></div>
           </div>
           <div class="col-sm-4" style="display:inline-block; vertical-align:top; text-align:right;">
+			<input type="hidden" name="config" id="config" value="" />
             <input type="hidden" name="configProfile" value="<?php echo $configProfile; ?>" />
             <input type="hidden" name="implementation" value="<?php echo $configSettings['implementation']; ?>" />
           <?php 
@@ -163,7 +168,7 @@ catch (\Exception $e) {
         <h4>Result</h4> 
         <div style="margin:0px auto; width:100%;">
           <div class="form-group col-sm-8" style="display:inline-block; vertical-align:top;">
-            <textarea class="form-control form-control-sm" rows="10" id="result"><?php echo cli::$log . PHP_EOL . $result; ?></textarea>
+            <div class="divtext form-control form-control-sm" id="result"><pre style="text-shadow:none;padding:20px;"><?php echo cli::$log . PHP_EOL . $result; ?></pre></div>
           </div>
         </div>
         <?php } ?>
@@ -172,31 +177,44 @@ catch (\Exception $e) {
   </body>
 </html>
 <script>
-var interval = null;
-$(document).ready(function() {
-<?php if ($loop && isset($_REQUEST['submit'])) { ?>
-    var cpt = <?php echo $configSettings['interval']/1000; ?>;
-    interval = setInterval(function() {
-        if (cpt ==  0) { 
-            refreshPage();
-            clearInterval(interval);
-        }     
-        if (cpt > 0) {   
-            $('#counter').html('Resend in ' + cpt );
-            --cpt;
-        }
-    }, 1000);
+	var interval = null;
+	$(document).ready(function() {
+	<?php if ($loop && isset($_REQUEST['submit'])) { ?>
+		var cpt = <?php echo $configSettings['interval']/1000; ?>;
+		interval = setInterval(function() {
+			if (cpt ==  0) { 
+				refreshPage();
+				clearInterval(interval);
+			}     
+			if (cpt > 0) {   
+				$('#counter').html('Resend in ' + cpt );
+				--cpt;
+			}
+		}, 1000);
 
-    $('#loop').change(function() {
-        if(!this.checked) {
-            $('#counter').html('Resend cancelled');
-            clearInterval(interval);
+		$('#loop').change(function() {
+			if(!this.checked) {
+				$('#counter').html('Resend cancelled');
+				clearInterval(interval);
+			}
+		});
+	<?php } ?> 
+		function refreshPage() {
+			$('#counter').html('<i class="fa fa-refresh fa-spin" style="font-size:24px"></i>');
+			$('#submit').click();
 		}
-    });
-<?php } ?> 
-    function refreshPage() {
-        $('#counter').html('<i class="fa fa-refresh fa-spin" style="font-size:24px"></i>');
-		$('#submit').click();
-	}
-});
+		
+		$('#frm').on('submit', function(e){
+            var json = JSON.stringify(editor.get(), null, 2);
+            $('#config').val(json);
+			this.submit();
+		});
+	});
+
+	// create the editor
+	var container = document.getElementById("configJson");
+	var options = {'mode': 'code', 'modes': ['code', 'form']};
+	var editor = new JSONEditor(container, options);
+	var json = <?php echo $jsonConfig; ?>;
+	editor.set(json);
 </script>
