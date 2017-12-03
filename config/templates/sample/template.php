@@ -4,11 +4,14 @@ return array(
 
     // Define the desired distribution (optional)
     'distribution' => array(
-        // We want to have 30% of our distribution with a value of 'Y' for the result field
-        // and 70% with a value of 'N'
-        'result' => array(
-            'Y' => 3,
-            'N' => 7,
+        'disable' => false,
+        'fields' => array(
+            // We want to have 30% of our distribution with a value of 'Y' for the result field
+            // and 70% with a value of 'N'
+            'result' => array(
+                'Y' => 3,
+                'N' => 7,
+            ),
         ),
     ),
 
