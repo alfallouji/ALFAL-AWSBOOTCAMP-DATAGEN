@@ -39,8 +39,6 @@ $token = isset($json['Token']) ? $json['Token'] : null;
 
 $configProfile = isset($_REQUEST['configProfile']) ? $_REQUEST['configProfile'] : key($webConfig['configProfiles']);
 $configSettings = $webConfig['configProfiles'][$configProfile];
-$configFile = __DIR__ . '/../config/templates/' . $configSettings['templateFolder'] . '/template.php';
-
 $configSettings['key'] = isset($_REQUEST['key']) ? $_REQUEST['key'] : $defaultKey;
 $configSettings['secret'] = isset($_REQUEST['secret']) ? $_REQUEST['secret'] : $defaultSecret;
 if ($token) { 
@@ -50,9 +48,17 @@ if ($token) {
 foreach ($configSettings as $k => $v) { 
     $configSettings[$k] = isset($_REQUEST[$k]) ? $_REQUEST[$k] : $v;
 }
-$jsonConfig = isset($_REQUEST['config']) ? $_REQUEST['config'] : json_encode(require $configFile, JSON_PRETTY_PRINT);
+
+$configFile = __DIR__ . '/../config/templates/' . $configSettings['templateFolder'] . '/template.php';
+$jsonConfig = isset($_REQUEST['config']) && !isset($_REQUEST['loadTemplate']) ? $_REQUEST['config'] : json_encode(require $configFile, JSON_PRETTY_PRINT);
 $configSettings['config'] = json_decode($jsonConfig, true);
 $loop = isset($_REQUEST['loop']) ? $_REQUEST['loop'] : false;
+$templateFolders = array();
+$dirs = array_filter(glob(__DIR__ . '/../config/templates/*'), 'is_dir');
+foreach ($dirs as $dir) { 
+    $parts = explode(DIRECTORY_SEPARATOR, $dir);
+    $templateFolders[] = array_pop($parts);
+}
 
 try {
     $result = null;
@@ -135,25 +141,45 @@ catch (\Exception $e) {
         <form action="?" method="post" id="frm" name="frm">
           <div class="form-group col-sm-4" style="display:inline-block;">
             <div class="divtext form-control form-control-sm" style="height:500px;" name="configJson" id="configJson"></div>
+            <div class="form-group row col-sm-12" style="margin-top:10px;">
+                <label class="col-sm-4 col-form-label col-form-label-sm" for="templateFolder">Template config</label>
+                <div class="col-sm-4">
+            <?php
+                echo '<select id="templateFolder" name="templateFolder" style="width:120px;" class="form-control-plaintext form-control-sm text-dark whitebg">';
+                foreach($templateFolders as $templateFolder) {
+                    echo '<option value="' . $templateFolder . '"';
+                    if ($templateFolder == $configSettings['templateFolder']) { 
+                        echo ' selected="selected"';
+                    }
+                    echo '>' . $templateFolder . '</option>';
+                }
+                echo '</select>';
+?>
+                </div>
+                <div class="col-sm-4">
+               <button type="submit" class="btn btn-primary" id="loadTemplate" name="loadTemplate">Load template</button>
+               </div>
+            </div>
+
           </div>
           <div class="col-sm-4" style="display:inline-block; vertical-align:top; text-align:right;">
 			<input type="hidden" name="config" id="config" value="" />
             <input type="hidden" name="configProfile" value="<?php echo $configProfile; ?>" />
             <input type="hidden" name="implementation" value="<?php echo $configSettings['implementation']; ?>" />
-          <?php 
+            <?php 
             foreach ($configSettings as $k => $v) { 
-                if ($k == 'config' || $k == 'comment' || $k == 'interval' || $v === null) 
+                if ($k == 'config' || $k == 'comment' || $k == 'interval' || $k == 'templateFolder' || $v === null) 
                     continue;
                 if (!$isLocal && ($k == 'key' || $k == 'secret' || $k == 'token')) 
                     continue;
-          ?>
-          <div class="form-group row col-sm-8">
-            <label class="col-sm-6 col-form-label col-form-label-sm" for="<?php echo $k; ?>"><?php echo ucfirst($k); ?></label>
-            <div class="col-sm-6">
-                <input class="form-control-plaintext form-control-sm text-dark whitebg" type="text" 
-                    id="<?php echo $k; ?>" name="<?php echo $k; ?>" value="<?php echo $v; ?>" placeholder="aws <?php echo $k; ?>"/>
+            ?>
+            <div class="form-group row col-sm-8">
+                <label class="col-sm-6 col-form-label col-form-label-sm" for="<?php echo $k; ?>"><?php echo ucfirst($k); ?></label>
+                <div class="col-sm-6">
+                    <input class="form-control-plaintext form-control-sm text-dark whitebg" type="text" 
+                        id="<?php echo $k; ?>" name="<?php echo $k; ?>" value="<?php echo $v; ?>" placeholder="aws <?php echo $k; ?>"/>
+                </div>
             </div>
-          </div>
           <?php } ?>
           <div class="form-group row" style="margin-left:175px;">
             <button style="width:350px;margin-bottom:10px;" type="submit" class="btn btn-primary" id="submit" name="submit">Generate</button>
@@ -203,7 +229,7 @@ catch (\Exception $e) {
 			$('#counter').html('<i class="fa fa-refresh fa-spin" style="font-size:24px"></i>');
 			$('#submit').click();
 		}
-		
+
 		$('#frm').on('submit', function(e){
             var json = JSON.stringify(editor.get(), null, 2);
             $('#config').val(json);
@@ -213,8 +239,9 @@ catch (\Exception $e) {
 
 	// create the editor
 	var container = document.getElementById("configJson");
-	var options = {'mode': 'code', 'modes': ['code', 'form']};
+	var options = {'mode': 'code', 'modes': ['code', 'form', 'tree']};
 	var editor = new JSONEditor(container, options);
 	var json = <?php echo $jsonConfig; ?>;
-	editor.set(json);
+    editor.set(json);
+    editor.expandAll();
 </script>
