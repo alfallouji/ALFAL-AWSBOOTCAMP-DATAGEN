@@ -1,6 +1,6 @@
 ## Disclaimer
 
-<b>This code is provided free of charge. If you decide to deploy this on AWS (using the cloudformation script), you may incur charges related to the resources you are using in AWS (e.g. EC2, S3, Kinesis, etc.).</b>
+<b>This code is provided free of charge. If you decide to deploy this on an EC2 instance in AWS (using the cloudformation script) or generate data and send them to your AWS resources (e.g. to your Kinesis stream, Firehose, Dynamodb table, etc.), you may incur charges related to the resources you are using in AWS.</b>
 
 ## Data Generator
 
@@ -37,7 +37,7 @@ You have full control on the structure of the data that you want to generate. Th
 
 You can also defined the the size of the population. The generated data will be pushed to a kinesis stream by batch (size of the batch is configurable). 
 
-When defining rules, it is your responsibility to ensure that the rules make sense. For example, if you defined the following : 
+When defining rules that are used by a distribution, ensure that the rules make sense. The engine will keep generating data until it reaches the desired distribution. For example, if you define the following : 
 
     'field1' => array(
         'type' => 'rules',
@@ -50,14 +50,17 @@ When defining rules, it is your responsibility to ensure that the rules make sen
 
 And, then define the following distribution : 
 
-	'distribution' => array(
-        'field1' => array(
-            'Y' => 80,
-            'N' => 20,
+    'distribution' => array(
+        'disable' => false,
+	'fields' => array(
+	    'field1' => array(
+                'Y' => 80,
+                'N' => 20,
+             ),
         ),
     )
 
-If `{field2} + {field3}` can never be equal or below 1060, then the generator will end up with an infinite loop. Since it will keep running until it reaches the desired distribution.
+`{field2} + {field3}` can never be equal or below 1060, then the generator will end up with an infinite loop. Since it will keep running until it reaches the desired distribution.
 
 ## Deploy it on AWS
 
