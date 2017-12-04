@@ -101,7 +101,7 @@ catch (\Exception $e) {
     <script src="js/jsoneditor.min.js"></script>
     <style>
         #container .divtext { margin:0px auto; width:100%; background-color:white; font-size:0.7em; text-align:left; }
-        #container .whitebg { background-color:#DDD; width:350px; }
+        #container .whitebg { background-color:#DDD; width:250px; }
         #container .thick { height: 30px; }
         #container #config a { color:blue; }
     </style>
@@ -142,8 +142,7 @@ catch (\Exception $e) {
           <div class="form-group col-sm-4" style="display:inline-block;">
             <div class="divtext form-control form-control-sm" style="height:500px;" name="configJson" id="configJson"></div>
             <div class="form-group row col-sm-12" style="margin-top:10px;">
-                <label class="col-sm-4 col-form-label col-form-label-sm" for="templateFolder">Template config</label>
-                <div class="col-sm-4">
+                <div class="col-sm-12">
             <?php
                 echo '<select id="templateFolder" name="templateFolder" style="width:120px;" class="form-control-plaintext form-control-sm text-dark whitebg">';
                 foreach($templateFolders as $templateFolder) {
@@ -155,8 +154,6 @@ catch (\Exception $e) {
                 }
                 echo '</select>';
 ?>
-                </div>
-                <div class="col-sm-4">
                <button type="submit" class="btn btn-primary" id="loadTemplate" name="loadTemplate">Load template</button>
                </div>
             </div>
@@ -173,19 +170,28 @@ catch (\Exception $e) {
                 if (!$isLocal && ($k == 'key' || $k == 'secret' || $k == 'token')) 
                     continue;
             ?>
-            <div class="form-group row col-sm-8">
-                <label class="col-sm-6 col-form-label col-form-label-sm" for="<?php echo $k; ?>"><?php echo ucfirst($k); ?></label>
-                <div class="col-sm-6">
+            <div class="form-group row col-sm-12">
+                <label class="col-sm-4 col-form-label col-form-label-sm" for="<?php echo $k; ?>"><?php echo ucfirst($k); ?></label>
+                <div class="col-sm-8">
                     <input class="form-control-plaintext form-control-sm text-dark whitebg" type="text" 
                         id="<?php echo $k; ?>" name="<?php echo $k; ?>" value="<?php echo $v; ?>" placeholder="aws <?php echo $k; ?>"/>
                 </div>
             </div>
           <?php } ?>
-          <div class="form-group row" style="margin-left:175px;">
-            <button style="width:350px;margin-bottom:10px;" type="submit" class="btn btn-primary" id="submit" name="submit">Generate</button>
-            <input style="margin-right:10px;margin-top:4px;" class="tiny" type="checkbox" id="loop" name="loop" placeholder="loop" value="1" <?php if ($loop) { echo 'checked="checked"'; } ?> />
-            <label for="loop">Resend every</label>
-            <input style="margin:0px 10px 0px 20px;width:150px;font-size:0.8em;height:30px;" type="text" id="interval" name="interval" value="<?php echo $configSettings['interval']; ?>"/> (ms)
+          <div class="form-group row col-sm-12">
+            <label class="col-sm-4"></label>
+            <div class="col-sm-8">
+                <button style="width:250px;" type="submit" class="btn btn-primary" id="submit" name="submit">Generate</button>
+            </div>
+          </div>
+
+          <div class="form-group row col-sm-12">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-8" style="font-size:0.8em;">
+                <input class="tiny" type="checkbox" id="loop" name="loop" placeholder="loop" value="1" <?php if ($loop) { echo 'checked="checked"'; } ?> />
+                <label for="loop">Send every</label>
+                <input style="margin:0px 5px 0px 5px;width:60px;font-size:0.8em;height:20px;" type="text" id="interval" name="interval" value="<?php echo $configSettings['interval']; ?>"/> (ms)
+            </div>
           </div>
           </div>
         </form>
