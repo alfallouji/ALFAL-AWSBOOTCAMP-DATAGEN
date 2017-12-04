@@ -1,8 +1,8 @@
-## Disclaimer
+# Disclaimer
 
 <b>This code is provided free of charge. If you decide to deploy this on an EC2 instance in AWS (using the cloudformation script) or generate data and send them to your AWS resources (e.g. to your Kinesis stream, Firehose, Dynamodb table, etc.), you may incur charges related to the resources you are using in AWS.</b>
 
-## Data Generator
+# Data Generator
 
 This tool provides an easy way to generate data sample and push them to the following targets : 
  - Kinesis Streams (AWS)
@@ -17,6 +17,10 @@ This tool provides an easy way to generate data sample and push them to the foll
 
 The tool comes with a web GUI and command line script. 
 
+## Web GUI Screenshot
+![Alt text](https://github.com/alfallouji/SCREENS/blob/master/Datagen/gui.png "Screenshot of the GUI")
+
+## Features
 You have full control on the structure of the data that you want to generate. The structure of the generated data can be defined within a configuration file. The following features are supported : 
 
  - Random integer (within a min-max range)
@@ -96,13 +100,13 @@ You can also (for testing purpose) deploy the solution locally, by doing the fol
  1. Clone the repository
  2. Run `sh setup/composer.sh` to install composer (if you don't have it)
  3. Create a config/credentials.php file (use the sample as an example) with the right aws credentials
- 4. You will need to install PHP7+ and apache
+ 4. You will need to install PHP7+ and apache (e.g. yum install php71 on macos, apt-get install php7.1 on Ubuntu)
 
 
 # Usage
 
 ## Web console 
-For the web console, use index.php.
+For the web console, open your browser and open index.php. 
 
 ## Command line
 You can also use the command line script generate.php. For usage help, run `php generate.php --help`.
