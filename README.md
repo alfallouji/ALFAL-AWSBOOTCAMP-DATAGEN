@@ -62,20 +62,32 @@ And, then define the following distribution :
 
 `{field2} + {field3}` can never be equal or below 1060, then the generator will end up with an infinite loop. Since it will keep running until it reaches the desired distribution.
 
-## Deploy it on AWS
+# Deployment 
 
 You can either deploy the solution locally or deploy it in AWS. From a performance perspective, you will get a better speed (request/sec) by deploying it in AWS (better network latency for the Kinesis API calls).
 
-In order to deploy the solution to AWS, do the following : 
+## Keep in mind
 
- 1. Clone the repository
+- Deploying and executing the code on an ec2 instance will provide the best performance for AWS targets (low latency).
+- Speed will also depend on how you have configured some of the service (e.g. number of shards that you have defined for Kinesis Streams).
+
+## Deploy it on AWS
+
+The easy way is to use the following link to deploy the latest version : [Build it on AWS](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=awsDatagenStack&templateURL=https://s3.amazonaws.com/alfal-awsbootcamp-datagen/cloudformation.json)
+
+If you have customized the code (e.g. added custom config, profiles or implementation), you will need to go through the following steps to create a custom deployment package :
+
+ 1. Clone the repository (and modify it according to your needs)
  2. Create an S3 Bucket in AWS
- 3. Install the AWS CLI
- 4. Run `sh setup/deploy.sh <YourS3BucketName>`
- 5. Run `sh setup/create-stack.sh` to create the cloudformation stack
+ 3. Install the AWS CLI 
+ 4. Run `sh setup/deploy.sh <YourS3BucketName>` (this will package the code and store it in S3)
+ 5. Run `sh setup/create-stack.sh` to create the cloudformation stack or use the console
  6. Wait for the cloudformation to finish (takes approx. 6 minutes). You will find the web URL in the output section of the cloudformation stack.
 
-You can also use the following link to deploy the latest version : [Build it on AWS](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=awsDatagenStack&templateURL=https://s3.amazonaws.com/alfal-awsbootcamp-datagen/cloudformation.json)
+Notes :
+- If you are using the console to create the cloudformation stack, then make sure to check the box saying : `"I acknowledge that AWS CloudFormation might create IAM resources."`
+- The cloudformation script will install php7, apache and deploy the code on the ec2 instance. 
+- Check the output to get the link of the web page. For example : http://ec2-34-22-91-12.compute-1.amazonaws.com/kinesis-datagen
 
 ## Deploy it locally
 
@@ -86,34 +98,17 @@ You can also (for testing purpose) deploy the solution locally, by doing the fol
  3. Create a config/credentials.php file (use the sample as an example) with the right aws credentials
  4. You will need to install PHP7+ and apache
 
-## Requirements
 
-In order to run, make sure to have the following : 
+# Usage
 
-- Run `composer install` after pulling the code from github
-- Create an S3 bucket
- Update the bucketName in the deploy.sh script
-- Use the deploy.sh script to deploy the code into S3 - this will also copy the cloudformation.json file there  
-- Provide the adequate S3 Bucket name when creating the cloudformation stack
-- Create a Kinesis Stream (remember its name, it will be needed in the webconsole)
-
-## Usage
-
-- Create a new cloudformation stack using the cloudformation.json file (which should be in the s3 bucket that you created previously). 
-- If you are using the console to create the cloudformation stack, then make sure to check the box saying : `"I acknowledge that AWS CloudFormation might create IAM resources."`
-- The cloudformation script will install php7, apache and deploy the code on the ec2 instance. 
-- Check the output to get the link of the web page. For example : http://ec2-34-22-91-12.compute-1.amazonaws.com/kinesis-datagen
-
-### Web console 
+## Web console 
 For the web console, use index.php.
 
-### Command line
+## Command line
 You can also use the command line script generate.php. For usage help, run `php generate.php --help`.
 
-## Keep in mind
 
-- Deploying and executing the code on an ec2 instance will provide the best performance for AWS targets (low latency).
-- Speed will also depend on how you have configured some of the service (e.g. number of shards that you have defined for Kinesis Streams).
+# Annex
 
 ## Example of a data structure
 
