@@ -136,7 +136,7 @@ catch (\Exception $e) {
       <label><?php echo isset($configSettings['comment']) ? $configProfile . ' | ' . $configSettings['comment'] . ' (to ' . $configSettings['implementation'] . ')' : null; ?></label>
     </nav>
     <div class="site-wrapper">
-      <div class="site-wrapper-inner">
+      <div class="site-wrapper-inner" style="width:1500px;">
         <div style="margin:100px auto 30px auto; width:100%;">
         <form action="?" method="post" id="frm" name="frm">
           <div class="form-group col-sm-4" style="display:inline-block;">
