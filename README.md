@@ -7,6 +7,7 @@
 This tool provides an easy way to generate data sample and push them to the following targets : 
  - Kinesis Streams (AWS)
  - Kinesis Firehose (AWS)
+ - IOT Topic (AWS)
  - Dynamodb (AWS)
  - SQS (AWS)
  - Cloudwatch logs (AWS)
