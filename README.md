@@ -30,7 +30,7 @@ You have full control on the structure of the data that you want to generate. Th
  - Timestamp / Date
  - Counter (increment & decrement)
  - Mathematical expression using previously defined fields 
-     `{{field1} + {field2} / 4) * {field3})`
+     `(({field1} + {field2} / 4) * {field3})`
  - Conditionnal rules : 
     `{field3} equals TRUE if {field1} + {field2} < 1000`
     `{field4} equals FALSE if {field1} + {field2} >= 1000`
