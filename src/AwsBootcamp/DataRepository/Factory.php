@@ -94,6 +94,15 @@ class Factory {
                 $repository = new \AwsBootcamp\DataRepository\Lambda($client, $params['functionName']);
             break;
 
+            case 'iot':
+                $client = new \Aws\IotDataPlane\IotDataPlaneClient([
+                    'version' => 'latest',
+                    'region'  => $params['region'],
+                    'credentials' => $credentials
+                ]);
+                $repository = new \AwsBootcamp\DataRepository\IOT($client, $params['topicUrl']);
+            break;
+
             default: 
                 throw new \Exception('Must provide a valid value for implementation');
             break;

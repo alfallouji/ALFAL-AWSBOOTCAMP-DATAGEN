@@ -228,5 +228,31 @@ return array(
             // FunctionName
             'functionName' => 'datagen-lambda-fn',
         ),
+        'sample-aws-iot' => array(
+            // Short comment displayed at the top
+            'comment' => 'This template will simulate a game being run numerous times',
+
+            // Template folder name - must be similar to the folder name in profiles/
+            'templateFolder' => 'game-base',
+
+            // Total number of entries generated
+            'total' => 20,
+
+            // Size of the batch to send to Kinesis
+            'batchSize' => 10,
+
+            // Interval for loop in ms
+            'interval' => 10000,
+
+            // Region
+            'region' => 'ap-southeast-2',
+
+            // Implementation to use 
+            'implementation' => 'iot',
+
+            // Topic URL
+            'topicUrl' => '$aws/things/argame01/shadow/update',
+        ),
+
     ),
 );
