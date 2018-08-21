@@ -30,7 +30,7 @@ You have full control on the structure of the data that you want to generate. Th
  - Timestamp / Date
  - Counter (increment & decrement)
  - Mathematical expression using previously defined fields 
-     `{{field1} + {field2} / 4) * {field3})`
+     `(({field1} + {field2} / 4) * {field3})`
  - Conditionnal rules : 
     `{field3} equals TRUE if {field1} + {field2} < 1000`
     `{field4} equals FALSE if {field1} + {field2} >= 1000`
@@ -38,6 +38,7 @@ You have full control on the structure of the data that you want to generate. Th
 - String expression that includes any other pre-defined field
 - Ability to defined the overall distribution (e.g I want 20% of my population to have a value of 'Y' for {field3}). The generator will run until it meets the desired distribution.
 - Ability to hide a variable (if you only need it to compute another variable)
+- Multi-dimensional array
 
 You can also defined the the size of the population. The generated data will be pushed to a kinesis stream by batch (size of the batch is configurable). 
 

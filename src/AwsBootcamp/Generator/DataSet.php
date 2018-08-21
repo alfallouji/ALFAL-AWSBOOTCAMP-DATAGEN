@@ -142,7 +142,8 @@ class DataSet {
         $cpt = 1;
         while($cpt <= $total) {
             foreach ($config['fields'] as $k => $v) { 
-                $this->_currentData[$k] = $this->_computeField($k, $v);
+                $computedField = $this->_computeField($k, $v);
+                $this->_currentData[$k] = $this->_transformField($computedField, $v); 
             }
                         
             if ($this->_validateData($this->_currentData)) {
@@ -182,6 +183,23 @@ class DataSet {
     }
 
     /**
+     * Transform a field (e.g. simple to array)
+     *
+     * @param string $computedField Field that was computed
+     * @param array $v Field infos
+     * 
+     * @return mixed Transformed value
+     */ 
+    protected function _transformField($computedField, $v) { 
+        if (isset($v['transform']) && $v['transform'] == 'array') { 
+            $separator = isset($v['separator']) ? $v['separator'] : ',';
+            return explode($separator, $computedField);
+        }
+
+        return $computedField;
+    }
+ 
+    /**
      * Compute a field
      *
      * @param string $k Field name 
@@ -207,6 +225,16 @@ class DataSet {
                 throw new \Exception('Invalid configuration. Must define a format value for date : ' . print_r($v, true)); 
             }
 
+            if (isset($v['unix'])) {
+                if (false !== strpos($v['unix'], '{')) { 
+                    $fieldName = str_replace(array('{', '}'), array('', ''), $v['unix']);
+                    $val = isset($this->_currentData[$fieldName]) ? $this->_currentData[$fieldName] : null;
+                } else { 
+                    $val = $v['unix'];
+                }
+                return date($v['format'], $val);
+            }
+
             return date($v['format']);
             break;
 
@@ -215,7 +243,9 @@ class DataSet {
                 throw new \Exception('Invalid configuration. Must define a randomList value : ' . print_r($v, true)); 
             }
 
-            return $v['randomList'][rand(0, sizeof($v['randomList']) - 1)];
+            $value = $v['randomList'][rand(0, sizeof($v['randomList']) - 1)];
+
+            return $value;
             break;
 
         case 'weightedList':
@@ -252,6 +282,13 @@ class DataSet {
             }
 
             $propertyName = $v['property'];
+            if (isset($v['param'])) { 
+                if ($propertyName !== 'unixTime') { 
+                    return $this->_faker->$propertyName($v['param'])->format($v['dateTime']);
+                } else { 
+                    return $this->_faker->$propertyName($v['param']);
+                }
+            }
             return $this->_faker->$propertyName;
             break;
 
