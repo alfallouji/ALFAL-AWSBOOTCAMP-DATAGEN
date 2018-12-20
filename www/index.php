@@ -137,9 +137,9 @@ catch (\Exception $e) {
     </nav>
     <div class="site-wrapper" style="width:100%;">
       <div class="site-wrapper-inner" style="width:100%;">
-        <div style="margin:100px auto 30px auto; width:100%;">
+        <div style="margin:100px auto 30px 50px; width:100%;">
         <form action="?" method="post" id="frm" name="frm">
-          <div class="form-group col-sm-4" style="display:inline-block;">
+          <div class="form-group col-sm-6" style="display:inline-block;">
             <div class="divtext form-control form-control-sm" style="height:500px;" name="configJson" id="configJson"></div>
             <div class="form-group row col-sm-12" style="margin-top:10px;">
                 <div class="col-sm-12">
