@@ -38,6 +38,11 @@ $defaultSecret = isset($json['SecretAccessKey']) ? $json['SecretAccessKey'] : $c
 $token = isset($json['Token']) ? $json['Token'] : null;
 
 $configProfile = isset($_REQUEST['configProfile']) ? $_REQUEST['configProfile'] : key($webConfig['configProfiles']);
+// Dont allow to read files outside of cwd
+if (strpos($configProfile, '..')) { 
+    die();
+}
+
 $configSettings = $webConfig['configProfiles'][$configProfile];
 $configSettings['key'] = isset($_REQUEST['key']) ? $_REQUEST['key'] : $defaultKey;
 $configSettings['secret'] = isset($_REQUEST['secret']) ? $_REQUEST['secret'] : $defaultSecret;
