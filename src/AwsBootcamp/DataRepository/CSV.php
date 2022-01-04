@@ -23,6 +23,15 @@ class CSV implements IDataRepository {
     }
 
     /**
+     * Returns filename
+     *
+     * @return string Filename
+     */
+    public function getFilename() { 
+        return $this->_filename;
+    }
+    
+    /**
      * Push current batch to kinesis
      * 
      * @param array $batch Batch to push
