@@ -119,7 +119,7 @@ catch (\Exception $e) {
             <div class="dropdown-menu" aria-labelledby="dropdown01">
                 <?php
                 foreach ($webConfig['configProfiles'] as $v => $data) {
-                    echo '<a class="dropdown-item" href="?configProfile=' . $v . '"';
+                    echo '<a class="dropdown-item" href="?configProfile=' . $v . '&templateFolder=' . $configSettings['templateFolder'] . '"';
                     if ($v == $configProfile) { 
                         echo ' style="background-color:#BBB;"';
                     }
