@@ -65,6 +65,7 @@ foreach ($dirs as $dir) {
     $templateFolders[] = array_pop($parts);
 }
 
+$fileLink = null;
 try {
     $result = null;
     if (isset($_REQUEST['submit'])) { 
@@ -83,6 +84,9 @@ try {
         $time = (microtime(true) - $start);
         $result .= PHP_EOL . 'Time : ' . $time . ' seconds' . PHP_EOL;
         $result .= 'Speed : ' . (sizeof($dataSet) / $time) . ' records/sec' . PHP_EOL . PHP_EOL;
+        if (property_exists($repository, '_filename')) {
+            $fileLink = $repository->getFilename();
+        }	    
     }
 }
 catch (\Exception $e) { 
@@ -202,7 +206,7 @@ catch (\Exception $e) {
         </form>
         </div>
         <?php if($result) { ?>
-        <h4>Result</h4> 
+        <h4>Result</h4><?php if ($link) { echo '<a href="' . $link . '">Download file</a>'; } ?>        
         <div style="margin:0px auto; width:100%;">
           <div class="form-group col-sm-8" style="display:inline-block; vertical-align:top;">
             <div class="divtext form-control form-control-sm" id="result"><pre style="text-shadow:none;padding:20px;"><?php echo cli::$log . PHP_EOL . $result; ?></pre></div>
