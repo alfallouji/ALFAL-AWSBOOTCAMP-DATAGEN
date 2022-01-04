@@ -21,7 +21,16 @@ class File implements IDataRepository {
     public function __construct($filename) { 
         $this->_filename = $filename;
     }
-
+    
+    /**
+     * Returns filename
+     *
+     * @return string Filename
+     */
+    public function getFilename() { 
+        return $this->_filename;
+    }
+    
     /**
      * Push current batch to kinesis
      * 
