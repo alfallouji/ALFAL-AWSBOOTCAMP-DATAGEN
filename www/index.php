@@ -206,7 +206,7 @@ catch (\Exception $e) {
         </form>
         </div>
         <?php if($result) { ?>
-        <h4>Result</h4><?php if ($link) { echo '<a href="' . $link . '">Download file</a>'; } ?>        
+        <h4>Result</h4><?php if ($link) { echo '<a target="_blank" href="' . $link . '">Download file</a>'; } ?>        
         <div style="margin:0px auto; width:100%;">
           <div class="form-group col-sm-8" style="display:inline-block; vertical-align:top;">
             <div class="divtext form-control form-control-sm" id="result"><pre style="text-shadow:none;padding:20px;"><?php echo cli::$log . PHP_EOL . $result; ?></pre></div>
