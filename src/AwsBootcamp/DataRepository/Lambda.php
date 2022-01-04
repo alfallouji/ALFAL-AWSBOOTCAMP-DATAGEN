@@ -49,7 +49,7 @@ class Lambda implements IDataRepository {
         $this->_invocationType = 'RequestResponse';
 		$this->_logType = 'None';
         $this->_qualifier = null;
-        $this->_clientContext = null;
+        $this->_clientContext = array();
     }
 
     /**
@@ -67,7 +67,7 @@ class Lambda implements IDataRepository {
 			'FunctionName' => $this->_functionName,
 			'InvocationType' => $this->_invocationType,
 			'LogType' => $this->_logType,
-			'ClientContext' => $this->_clientContext,
+			'ClientContext' => base64_encode(json_encode($this->_clientContext)),
 			'Payload' => $data,
 		));
 		\cli::log('Pushing to lambda a payload of ' . sizeof($batch) . ' records to ' . $this->_functionName);
