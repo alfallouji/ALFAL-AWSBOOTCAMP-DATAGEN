@@ -5,7 +5,7 @@ namespace AwsBootcamp\Generator;
  * DataSet Generator (for Kinesis)
  * Class that will generate a set of data and push it to a Kinesis stream
  */
-class DataSet { 
+class DataSet {
     /**
      * Assoc array containing configuration definition of the data set to generate
      * @var array
@@ -43,7 +43,7 @@ class DataSet {
     protected $_expectedDistribution = array();
 
     /**
-     * Current distribution of the data set 
+     * Current distribution of the data set
      * @var array
      */
     protected $_currentDistribution = array();
@@ -55,7 +55,7 @@ class DataSet {
     protected $_evalMath = null;
 
     /**
-     * Helper class to generate fake data 
+     * Helper class to generate fake data
      * @var \Faker
      */
     protected $_faker = null;
@@ -73,8 +73,8 @@ class DataSet {
     protected $_hiddenFields = array();
 
     /**
-     * Data repository where data is being pushed to 
-     * @var AwsBootcamp\DataRepository\IDataRepository 
+     * Data repository where data is being pushed to
+     * @var AwsBootcamp\DataRepository\IDataRepository
      */
     protected $_dataRepository = null;
 
@@ -84,7 +84,7 @@ class DataSet {
      * @param AwsBootcamp\DataRepository\IDataRepository $dataRepository Data Repository
      * @return void
      */
-    public function __construct(\AwsBootcamp\DataRepository\IDataRepository $dataRepository) { 
+    public function __construct(\AwsBootcamp\DataRepository\IDataRepository $dataRepository) {
         $this->_faker = \Faker\Factory::create();
         $this->_evalMath = new \Webit\Util\EvalMath\EvalMath();
         $this->_dataRepository = $dataRepository;
@@ -99,13 +99,13 @@ class DataSet {
      *
      * @return array The whole generated dataset
      */
-    public function execute(array $config, $total, $batchSize) { 
+    public function execute(array $config, $total, $batchSize) {
         $this->_dataSet = array();
         $this->_patternFields = array();
         $currentBatch = array();
 
         // Get list of fields for pattern replacement and to hide
-        foreach ($config['fields'] as $field => $data) { 
+        foreach ($config['fields'] as $field => $data) {
             $this->_patternFields[] = '{' . $field . '}';
             if (isset($data['hide']) && true === $data['hide']) {
                 $this->_hiddenFields[] = $field;
@@ -116,21 +116,21 @@ class DataSet {
         $enableDistribution = isset($config['distribution']['disable']) ? !$config['distribution']['disable'] : false;
 
         // Get desired distribution if any defined
-        if ($enableDistribution) { 
-            foreach ($config['distribution']['fields'] as $field => $data) { 
+        if ($enableDistribution) {
+            foreach ($config['distribution']['fields'] as $field => $data) {
                 $sum = array_sum($data);
-                foreach ($data as $value => $weight) { 
+                foreach ($data as $value => $weight) {
                     $this->_expectedDistribution[$field][$value] = (int) (($weight / $sum) * $total);
                     $this->_currentDistribution[$field][$value] = 0;
                 }
 
-                // Ensure we generate the right amount 
+                // Ensure we generate the right amount
                 $delta = $total - array_sum($this->_expectedDistribution[$field]);
-                if ($delta != 0) { 
+                if ($delta != 0) {
                     $this->_expectedDistribution[$field][$value] += $delta;
                 }
 
-                foreach ($data as $value => $weight) { 
+                foreach ($data as $value => $weight) {
                     \cli::log('I will generate ' . $this->_expectedDistribution[$field][$value] . ' records with ' . $field . ' = ' . $value);
                 }
             }
@@ -141,25 +141,25 @@ class DataSet {
         $bigTotal = 1;
         $cpt = 1;
         while($cpt <= $total) {
-            foreach ($config['fields'] as $k => $v) { 
+            foreach ($config['fields'] as $k => $v) {
                 $computedField = $this->_computeField($k, $v);
-                $this->_currentData[$k] = $this->_transformField($computedField, $v); 
+                $this->_currentData[$k] = $this->_transformField($computedField, $v);
             }
-                        
+
             if ($this->_validateData($this->_currentData)) {
                 ++$cpt;
                 $filteredData = $this->_filterHiddenFields($this->_currentData);
                 $this->_dataSet[] = $filteredData;
                 $currentBatch[] = $filteredData;
 
-                // Push batch to kinesis 
+                // Push batch to kinesis
                 if (sizeof($currentBatch) == $batchSize) {
                     $this->_dataRepository->push($currentBatch);
                     $currentBatch = array();
                 }
             } else {
                 // Decrement counter (if any)
-                foreach ($this->_counters as $key => $value) { 
+                foreach ($this->_counters as $key => $value) {
                     $this->_counters[$key] -= $config['fields'][$key]['counter']['step'];
                 }
             }
@@ -187,127 +187,142 @@ class DataSet {
      *
      * @param string $computedField Field that was computed
      * @param array $v Field infos
-     * 
+     *
      * @return mixed Transformed value
-     */ 
-    protected function _transformField($computedField, $v) { 
-        if (isset($v['transform']) && $v['transform'] == 'array') { 
+     */
+    protected function _transformField($computedField, $v) {
+        if (isset($v['transform']) && $v['transform'] == 'array') {
             $separator = isset($v['separator']) ? $v['separator'] : ',';
             return explode($separator, $computedField);
         }
 
         return $computedField;
     }
- 
+
     /**
      * Compute a field
      *
-     * @param string $k Field name 
+     * @param string $k Field name
      * @param array $v Assoc array containing settings and config for the field to compute
      * @return mixed Computed value
      * @throws \Exception throws an exception if an invalid configuration is defined
      */
     protected function _computeField($k, $v) {
-        switch ($v['type']) { 
-        case 'randomNumber':
-            if (!isset($v['randomNumber']['min'])) { 
-                throw new \Exception('Invalid configuration. Must define a randomNumber[min] value : ' . print_r($v, true)); 
-            }
-            if (!isset($v['randomNumber']['max'])) { 
-                throw new \Exception('Invalid configuration. Must define a randomNumber[max] value : ' . print_r($v, true)); 
-            }
-
-            return rand($v['randomNumber']['min'], $v['randomNumber']['max']);
-            break;
-
-        case 'date':
-            if (!isset($v['format'])) { 
-                throw new \Exception('Invalid configuration. Must define a format value for date : ' . print_r($v, true)); 
-            }
-
-            if (isset($v['unix'])) {
-                if (false !== strpos($v['unix'], '{')) { 
-                    $fieldName = str_replace(array('{', '}'), array('', ''), $v['unix']);
-                    $val = isset($this->_currentData[$fieldName]) ? $this->_currentData[$fieldName] : null;
-                } else { 
-                    $val = $v['unix'];
+        switch ($v['type']) {
+            case 'array':
+                $result = array();
+                if (!isset($v['array']])) {
+                    throw new \Exception('Invalid configuration. Must define an array value : ' . print_r($v, true));
                 }
-                return date($v['format'], $val);
-            }
 
-            return date($v['format']);
-            break;
-
-        case 'randomList':
-            if (!isset($v['randomList'])) { 
-                throw new \Exception('Invalid configuration. Must define a randomList value : ' . print_r($v, true)); 
-            }
-
-            $value = $v['randomList'][rand(0, sizeof($v['randomList']) - 1)];
-
-            return $value;
-            break;
-
-        case 'weightedList':
-            if (!isset($this->_weightedData[$k])) { 
-                $this->_weightedData[$k] = array('config' => $v['weightedList'], 'current' => array_keys($v['weightedList']));
-            }
-
-            return $this->_getRandomWeightedElement($this->_weightedData[$k]['config']);
-            break;
-
-        case 'constant':
-            if (!isset($v['constant'])) { 
-                throw new \Exception('Invalid configuration. Must define a constant value : ' . print_r($v, true)); 
-            }
-
-            return $v['constant'];
-            break;
-
-        case 'rules':
-            return $this->_computeRules($v);
-            break;
-
-        case 'mathExpression':
-            return $this->_computeMathExpression($v);
-            break;
-
-        case 'stringExpression':
-            return $this->_computeStringExpression($v);
-            break;
-
-        case 'faker':
-            if (!isset($v['property'])) { 
-                throw new \Exception('Invalid configuration. Must define a property value : ' . print_r($v, true)); 
-            }
-
-            $propertyName = $v['property'];
-            if (isset($v['param'])) { 
-                if ($propertyName !== 'unixTime') { 
-                    return $this->_faker->$propertyName($v['param'])->format($v['dateTime']);
-                } else { 
-                    return $this->_faker->$propertyName($v['param']);
+                foreach($v['array'] as $key => $subValue) {
+                    $result[$key] = $this->_computeField($key, $subValue);
                 }
-            }
-            return $this->_faker->$propertyName;
-            break;
+                return $result;
 
-        case 'counter':
-            if (!isset($v['counter']['start']) || !isset($v['counter']['step'])) { 
-                throw new \Exception('Invalid configuration. Must provide a start and a step parameters : ' . print_r($v, true));
-            }
+            case 'randomNumber':
+                if (!isset($v['randomNumber']['min'])) {
+                    throw new \Exception('Invalid configuration. Must define a randomNumber[min] value : ' . print_r($v, true));
+                }
+                if (!isset($v['randomNumber']['max'])) {
+                    throw new \Exception('Invalid configuration. Must define a randomNumber[max] value : ' . print_r($v, true));
+                }
 
-            if (!isset($this->_counters[$k])) { 
-                $this->_counters[$k] = $v['counter']['start'];
-            } else { 
-                $this->_counters[$k] += $v['counter']['step'];
-            }
+                return rand($v['randomNumber']['min'], $v['randomNumber']['max']);
+                break;
 
-            return $this->_counters[$k];
-            
-        default:
-            throw new \Exception('Invalid configuration. Unknown type defined : ' . $v['type']);
-            break;
+            case 'timestamp':
+                return time();
+                break;
+
+            case 'date':
+                if (!isset($v['format'])) {
+                    throw new \Exception('Invalid configuration. Must define a format value for date : ' . print_r($v, true));
+                }
+
+                if (isset($v['unix'])) {
+                    if (false !== strpos($v['unix'], '{')) {
+                        $fieldName = str_replace(array('{', '}'), array('', ''), $v['unix']);
+                        $val = isset($this->_currentData[$fieldName]) ? $this->_currentData[$fieldName] : null;
+                    } else {
+                        $val = $v['unix'];
+                    }
+                    return date($v['format'], $val);
+                }
+
+                return date($v['format']);
+                break;
+
+            case 'randomList':
+                if (!isset($v['randomList'])) {
+                    throw new \Exception('Invalid configuration. Must define a randomList value : ' . print_r($v, true));
+                }
+
+                $value = $v['randomList'][rand(0, sizeof($v['randomList']) - 1)];
+
+                return $value;
+                break;
+
+            case 'weightedList':
+                if (!isset($this->_weightedData[$k])) {
+                    $this->_weightedData[$k] = array('config' => $v['weightedList'], 'current' => array_keys($v['weightedList']));
+                }
+
+                return $this->_getRandomWeightedElement($this->_weightedData[$k]['config']);
+                break;
+
+            case 'constant':
+                if (!isset($v['constant'])) {
+                    throw new \Exception('Invalid configuration. Must define a constant value : ' . print_r($v, true));
+                }
+
+                return $v['constant'];
+                break;
+
+            case 'rules':
+                return $this->_computeRules($v);
+                break;
+
+            case 'mathExpression':
+                return $this->_computeMathExpression($v);
+                break;
+
+            case 'stringExpression':
+                return $this->_computeStringExpression($v);
+                break;
+
+            case 'faker':
+                if (!isset($v['property'])) {
+                    throw new \Exception('Invalid configuration. Must define a property value : ' . print_r($v, true));
+                }
+
+                $propertyName = $v['property'];
+                if (isset($v['param'])) {
+                    if ($propertyName !== 'unixTime') {
+                        return $this->_faker->$propertyName($v['param'])->format($v['dateTime']);
+                    } else {
+                        return $this->_faker->$propertyName($v['param']);
+                    }
+                }
+                return $this->_faker->$propertyName;
+                break;
+
+            case 'counter':
+                if (!isset($v['counter']['start']) || !isset($v['counter']['step'])) {
+                    throw new \Exception('Invalid configuration. Must provide a start and a step parameters : ' . print_r($v, true));
+                }
+
+                if (!isset($this->_counters[$k])) {
+                    $this->_counters[$k] = $v['counter']['start'];
+                } else {
+                    $this->_counters[$k] += $v['counter']['step'];
+                }
+
+                return $this->_counters[$k];
+
+            default:
+                throw new \Exception('Invalid configuration. Unknown type defined : ' . $v['type']);
+                break;
         }
     }
 
@@ -318,7 +333,7 @@ class DataSet {
      * @return mixed Value computed by the rules
      */
     protected function _computeRules($v) {
-        foreach($v['rules'] as $value => $patternRule) { 
+        foreach($v['rules'] as $value => $patternRule) {
             $rule = str_replace($this->_patternFields, $this->_currentData, $patternRule);
 
             if (false !== strpos($rule, '{') || false !== strpos($rule, '}')) {
@@ -345,7 +360,7 @@ class DataSet {
      * @param string $v String expression
      * @return mixed Evaluated result
      */
-    protected function _computeStringExpression($v) { 
+    protected function _computeStringExpression($v) {
         return str_replace($this->_patternFields, $this->_currentData, $v['stringExpression']);
     }
 
@@ -355,7 +370,7 @@ class DataSet {
      * @param string $v Math expression
      * @return mixed Evaluated result
      */
-    protected function _computeMathExpression($v) { 
+    protected function _computeMathExpression($v) {
         $rule = str_replace($this->_patternFields, $this->_currentData, $v['mathExpression']);
 
         if (false !== strpos($rule, '{') || false !== strpos($rule, '}')) {
@@ -367,7 +382,7 @@ class DataSet {
     /**
      * Validate data (based on global conditions / rules) against expected distribution
      *
-     * @param array $dataRow Assoc array 
+     * @param array $dataRow Assoc array
      * @return boolean True if data is valid, false otherwise
      */
     protected function _validateData($dataRow) {
@@ -378,8 +393,8 @@ class DataSet {
             }
         }
 
-        // Update currentDistribution 
-        foreach ($this->_expectedDistribution as $k => $values) { 
+        // Update currentDistribution
+        foreach ($this->_expectedDistribution as $k => $values) {
             $currentValue = $dataRow[$k];
             ++$this->_currentDistribution[$k][$currentValue];
         }
@@ -389,7 +404,7 @@ class DataSet {
 
     /**
      * Helper function to get a random element using weights
-     * 
+     *
      * @param array $weightedValues Assoc array (value => weight)
      * @return mixed Value
      */
@@ -411,12 +426,12 @@ class DataSet {
      * @return array Filtered data
      */
     protected function _filterHiddenFields(array $data) {
-        if (empty($this->_hiddenFields)) { 
+        if (empty($this->_hiddenFields)) {
             return $data;
         }
 
         foreach ($this->_hiddenFields as $field) {
-            unset($data[$field]);            
+            unset($data[$field]);
         }
 
         return $data;
