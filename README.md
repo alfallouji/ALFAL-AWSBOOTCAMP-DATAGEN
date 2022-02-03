@@ -44,7 +44,7 @@ You have full control on the structure of the data that you want to generate. Th
 You can also defined the the size of the population. The generated data will be pushed to a kinesis stream by batch (size of the batch is configurable). 
 
 When defining rules that are used by a distribution, ensure that the rules make sense. The engine will keep generating data until it reaches the desired distribution. For example, if you define the following : 
-
+```
     'field1' => array(
         'type' => 'rules',
         // Value => condition
@@ -53,9 +53,10 @@ When defining rules that are used by a distribution, ensure that the rules make 
             'N' => '{field2} + {field3} <= 1060',
         ),        
     ),
+```
 
 And, then define the following distribution : 
-
+```
     'distribution' => array(
         'disable' => false,
 	'fields' => array(
@@ -65,6 +66,7 @@ And, then define the following distribution :
              ),
         ),
     )
+```
 
 `{field2} + {field3}` can never be equal or below 1060, then the generator will end up with an infinite loop. Since it will keep running until it reaches the desired distribution.
 
