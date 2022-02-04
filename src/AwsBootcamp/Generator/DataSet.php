@@ -211,7 +211,7 @@ class DataSet {
         switch ($v['type']) {
             case 'array':
                 $result = array();
-                if (!isset($v['array']])) {
+                if (!isset($v['array'])) {
                     throw new \Exception('Invalid configuration. Must define an array value : ' . print_r($v, true));
                 }
 
