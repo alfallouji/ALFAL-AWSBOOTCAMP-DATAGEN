@@ -20,7 +20,7 @@ class File implements IDataRepository {
      */
     public function __construct($filename) { 
         $this->_filename = $filename;
-        file_put_contetns($this->_filename, "");
+        file_put_contents($this->_filename, "");        
     }
     
     /**
